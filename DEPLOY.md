@@ -154,6 +154,7 @@ In Cloudflare **Rules** → **Page Rules** (or **Redirect Rules**): redirect `ht
 
 3. **In Render**  
    - Service is connected to your GitHub repo and branch.  
+   - **Root Directory** must be **empty** (or `.`). This repo has no `backend` folder — `server.js` is at the repo root. If you see "Root directory 'backend' does not exist", clear Root Directory in Settings.  
    - **Start command:** `npm start` (default). Do **not** override with a custom port (e.g. no `next start -p 6036`).  
    - **Do not** set `PORT` in Environment — Render injects it (e.g. 10000).  
    - Trigger deploy (or let auto-deploy run after push).
@@ -165,7 +166,8 @@ In Cloudflare **Rules** → **Page Rules** (or **Redirect Rules**): redirect `ht
 1. Go to **[render.com](https://render.com)** and sign in with **GitHub**.
 2. **New** → **Web Service**.
 3. Connect repo **HALF-2300/NightDrive** (so every push to GitHub can trigger a deploy).
-4. **Build command:** `npm install`  
+4. **Root Directory:** leave **empty** (repo root has `server.js`; there is no `backend` folder).  
+   **Build command:** `npm install`  
    **Start command:** `npm start` (do not override; the app binds to `PORT` from the environment)  
    **Instance type:** Free (or paid for persistent disk).
 5. **Environment** → Add: `NODE_ENV`, `MARKETCHECK_API_KEY`, `ADMIN_TOKEN`, `ALLOWED_ORIGINS` (use the Render URL they give you, e.g. `https://nightdrive.onrender.com`, and add `https://nightdrive.store`, `https://nightdrive-795.pages.dev`).  
