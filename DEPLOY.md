@@ -28,7 +28,7 @@ This runs **`wrangler pages deploy public --project-name=nightdrive`**. You must
 
 **For real cars and full layout on Cloudflare Pages:** The Node API must run elsewhere (e.g. Railway). Then:
 1. Deploy the Node app to **Railway** (or Render), set env vars and **ALLOWED_ORIGINS** = `https://nightdrive-795.pages.dev` and `https://nightdrive.store`.
-2. In **`public/config.js`** set `window.ND_API_BASE = 'https://YOUR-RAILWAY-URL.up.railway.app';` (no trailing slash).
+2. In **`public/config.js`** set `window.ND_API_BASE = 'https://YOUR-BACKEND-URL';` (your Render or Railway URL, no trailing slash).
 3. Run **`npm run deploy:web`** again so Pages serves the updated frontend. The site will then load real data, all rails, and contact/newsletter will work.
 
 See **DEPLOY-FROM-AGENT.md** for why agent deploy can fail and how to enable it with tokens.
@@ -61,7 +61,7 @@ Optional: `LEAD_WEBHOOK_URL`, `LEAD_WEBHOOK_SECRET` if you use a webhook for lea
   In **Cloudflare Dashboard** → **DNS** for nightdrive.store:
   - **Type:** CNAME  
   - **Name:** `@` (root) or `www` if you use www  
-  - **Target:** your app’s hostname (e.g. `autoelite-production-xxxx.up.railway.app` or `autoelite.onrender.com`)  
+  - **Target:** your app’s hostname (e.g. `nightdrive-production-xxxx.up.railway.app` or `nightdrive.onrender.com`)  
   - **Proxy status:** Proxied (orange cloud) recommended for DDoS and SSL
 
 - **Your own server (IP):**  
@@ -84,7 +84,7 @@ In Cloudflare **Rules** → **Page Rules** (or **Redirect Rules**): redirect `ht
 
 1. Go to **[railway.app](https://railway.app)** and sign in with **GitHub**.
 2. Click **New Project** → **Deploy from GitHub repo**.
-3. Select **HALF-2300/autoelite** (authorize Railway if asked).
+3. Select **HALF-2300/NightDrive** (authorize Railway if asked).
 4. Railway will detect Node and run `npm install` + `npm start`. Click **Deploy**.
 5. After deploy, open **Settings** → **Variables** and add:
    - `NODE_ENV` = `production`
@@ -120,13 +120,15 @@ In Cloudflare **Rules** → **Page Rules** (or **Redirect Rules**): redirect `ht
 
 1. Go to **[render.com](https://render.com)** and sign in with **GitHub**.
 2. **New** → **Web Service**.
-3. Connect **HALF-2300/autoelite**.
+3. Connect repo **HALF-2300/NightDrive** (so every push to GitHub can trigger a deploy).
 4. **Build command:** `npm install`  
    **Start command:** `npm start` (do not override; the app binds to `PORT` from the environment)  
    **Instance type:** Free (or paid for persistent disk).
-5. **Environment** → Add: `NODE_ENV`, `MARKETCHECK_API_KEY`, `ADMIN_TOKEN`, `ALLOWED_ORIGINS` (use the Render URL they give you, e.g. `https://autoelite.onrender.com`).  
+5. **Environment** → Add: `NODE_ENV`, `MARKETCHECK_API_KEY`, `ADMIN_TOKEN`, `ALLOWED_ORIGINS` (use the Render URL they give you, e.g. `https://nightdrive.onrender.com`, and add `https://nightdrive.store`, `https://nightdrive-795.pages.dev`).  
    **Do not set `PORT`** — Render injects it automatically (e.g. 10000). The app uses `process.env.PORT`.
 6. Click **Create Web Service**.
+
+**Make it run from GitHub:** In Render → your service → **Settings** → **Build & Deploy** → **Auto-Deploy** = Yes. Then every push to `main` on GitHub triggers a new deploy on Render.
 
 ---
 
@@ -134,8 +136,8 @@ In Cloudflare **Rules** → **Page Rules** (or **Redirect Rules**): redirect `ht
 
 ```bash
 # On the server (Ubuntu example)
-git clone https://github.com/HALF-2300/autoelite.git
-cd autoelite
+git clone https://github.com/HALF-2300/NightDrive.git
+cd NightDrive
 cp .env.example .env
 # Edit .env: NODE_ENV=production, MARKETCHECK_API_KEY, ADMIN_TOKEN, ALLOWED_ORIGINS
 npm install
