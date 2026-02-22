@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  audit-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: npm audit
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
+
+      - name: Prod env fail-start (P0)
+        run: |
+          (NODE_ENV=production node server.js 2>&1; true) | tee /tmp/out.txt
+          grep -q "required" /tmp/out.txt || (echo "Expected process to exit with 'required' error"; exit 1)
+
+      - name: Start server (dev)
+        run: |
+          ALLOWED_ORIGINS=http://localhost:1335 MARKETCHECK_API_KEY=dummy ADMIN_TOKEN=test node server.js &
+          sleep 3
+
+      - name: Smoke (health + readiness + admin 401)
+        run: |
+          curl -sf http://localhost:1335/health | grep -q status
+          curl -sf http://localhost:1335/api/readiness | grep -q checks
+          code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:1335/api/admin/stats)
+          test "$code" = "401"

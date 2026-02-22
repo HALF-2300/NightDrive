@@ -1,0 +1,24 @@
+{
+  "name": "autoelite",
+  "version": "2.0.0",
+  "description": "AutoElite — Premium car dealership platform with real-time MarketCheck API inventory, intelligent data pipeline, and production-grade infrastructure",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "gen:cars-corpus": "node scripts/gen-cars-corpus.js",
+    "gen:og-images": "node scripts/download-og-placeholders.js",
+    "backup-leads": "node scripts/backup-leads.js",
+    "pm2:start": "pm2 start ecosystem.config.js --env production",
+    "pm2:stop": "pm2 stop autoelite",
+    "pm2:restart": "pm2 restart autoelite",
+    "pm2:logs": "pm2 logs autoelite",
+    "pm2:status": "pm2 status",
+    "pm2:setup": "pm2 install pm2-logrotate && pm2 set pm2-logrotate:max_size 10M && pm2 set pm2-logrotate:retain 14 && pm2 set pm2-logrotate:compress true"
+  },
+  "keywords": ["car", "dealership", "inventory", "autoelite", "marketcheck"],
+  "license": "PRIVATE",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

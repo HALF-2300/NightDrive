@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse our full inventory of premium new and pre-owned vehicles. Filter by make, model, price, and more.">
+  <meta name="theme-color" content="#050608">
+  <title>Inventory — NightDrive</title>
+  <link rel="canonical" href="https://nightdrive.store/inventory">
+  <meta property="og:title" content="Inventory — NightDrive">
+  <meta property="og:description" content="Enter the collection. Premium new and pre-owned. Market-verified pricing.">
+  <meta property="og:image" content="https://nightdrive.store/images/og-inventory.jpg">
+  <meta property="og:url" content="https://nightdrive.store/inventory">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Inventory — NightDrive">
+  <meta name="twitter:description" content="Enter the collection. Premium new and pre-owned. Market-verified pricing.">
+  <meta name="twitter:image" content="https://nightdrive.store/images/og-inventory.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/theme-premium-dark.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="inventory-page">
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- LOCATION MODAL -->
+  <div class="loc-overlay" id="locOverlay">
+    <div class="loc-modal">
+      <div class="loc-icon"><i class="fas fa-location-dot"></i></div>
+      <h2 class="loc-title">Find Cars Near You</h2>
+      <p class="loc-desc">Allow location access to see inventory closest to you, with accurate distances and local pricing.</p>
+      <button class="btn btn-primary loc-btn" id="locAllow"><i class="fas fa-location-crosshairs"></i> Use My Location</button>
+      <div class="loc-divider"><span>or</span></div>
+      <div class="loc-manual">
+        <input type="text" class="loc-input" id="locZipInput" placeholder="Enter ZIP code" maxlength="5" inputmode="numeric" pattern="[0-9]*">
+        <button class="btn btn-secondary loc-btn-zip" id="locZipBtn">Go</button>
+      </div>
+      <button class="loc-skip" id="locSkip">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar scrolled" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="logo">
+        <i class="fas fa-moon"></i>
+        <span>Night<strong>Drive</strong></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/inventory" class="active">Inventory</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+      <div class="nav-right">
+        <button class="nav-loc" id="navLocBtn" aria-label="Set location"><i class="fas fa-location-dot"></i> <span id="navLocLabel">Set Location</span></button>
+        <a href="tel:909302240" class="nav-phone"><i class="fas fa-phone"></i> 909 302 240</a>
+        <a href="/inventory" class="btn btn-primary btn-sm">Explore Cars</a>
+      </div>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO — same impressive ground as Home (car behind) -->
+  <section class="hero-page">
+    <div class="hero-page-bg"></div>
+    <div class="hero-page-glow"></div>
+    <div class="container hero-page-inner">
+      <h1 class="h1">Enter the Collection</h1>
+      <p class="hero-page-subtitle">Verified dealer listings. Market-verified pricing. Ranked by value and demand.</p>
+      <div class="breadcrumb">
+        <a href="/">Home</a>
+        <span class="sep">/</span>
+        <span class="current">Inventory</span>
+      </div>
+    </div>
+  </section>
+
+  <main id="main">
+    <section class="section" style="padding-top:24px;">
+      <div class="container">
+        <p class="subtitle" style="margin-bottom:16px;font-size:0.875rem;opacity:0.85">Prices and availability subject to change. Verify details with the dealer before purchase.</p>
+        <div class="inventory-layout">
+
+          <!-- SIDEBAR — grouped with visual hierarchy -->
+          <aside class="sidebar" aria-label="Filters">
+
+            <!-- Most-used first: Condition -->
+            <div class="filter-group">
+              <h3>Condition</h3>
+              <label class="filter-check"><input type="checkbox"> New</label>
+              <label class="filter-check"><input type="checkbox"> Pre-Owned</label>
+              <label class="filter-check"><input type="checkbox"> Certified</label>
+            </div>
+
+            <!-- Make -->
+            <div class="filter-group">
+              <h3>Make</h3>
+              <div class="select-wrap">
+                <select id="filterMake">
+                  <option value="">All Makes</option>
+                  <option>Acura</option>
+                  <option>Audi</option>
+                  <option>BMW</option>
+                  <option>Cadillac</option>
+                  <option>Chevrolet</option>
+                  <option>Dodge</option>
+                  <option>Ford</option>
+                  <option>Genesis</option>
+                  <option>GMC</option>
+                  <option>Honda</option>
+                  <option>Hyundai</option>
+                  <option>Infiniti</option>
+                  <option>Jaguar</option>
+                  <option>Jeep</option>
+                  <option>Kia</option>
+                  <option>Land Rover</option>
+                  <option>Lexus</option>
+                  <option>Lincoln</option>
+                  <option>Maserati</option>
+                  <option>Mazda</option>
+                  <option>Mercedes-Benz</option>
+                  <option>Nissan</option>
+                  <option>Porsche</option>
+                  <option>RAM</option>
+                  <option>Rivian</option>
+                  <option>Subaru</option>
+                  <option>Tesla</option>
+                  <option>Toyota</option>
+                  <option>Volkswagen</option>
+                  <option>Volvo</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="filter-group">
+              <h3>Price Range</h3>
+              <div class="price-range">
+                <input type="number" class="input" placeholder="Min" aria-label="Minimum price" style="flex:1;min-width:0">
+                <span>—</span>
+                <input type="number" class="input" placeholder="Max" aria-label="Maximum price" style="flex:1;min-width:0">
+              </div>
+            </div>
+
+            <!-- Body Type -->
+            <div class="filter-group">
+              <h3>Body Type</h3>
+              <label class="filter-check"><input type="checkbox"> Sedan</label>
+              <label class="filter-check"><input type="checkbox"> SUV</label>
+              <label class="filter-check"><input type="checkbox"> Coupe</label>
+              <label class="filter-check"><input type="checkbox"> Pickup</label>
+              <label class="filter-check"><input type="checkbox"> Convertible</label>
+              <label class="filter-check"><input type="checkbox"> Hatchback</label>
+              <label class="filter-check"><input type="checkbox"> Minivan</label>
+              <label class="filter-check"><input type="checkbox"> Wagon</label>
+            </div>
+
+            <!-- Year -->
+            <div class="filter-group">
+              <h3>Year</h3>
+              <div class="price-range">
+                <div class="select-wrap" style="flex:1;min-width:0">
+                  <select id="filterYearFrom" aria-label="From year">
+                    <option value="">From</option>
+                    <option>2020</option>
+                    <option>2021</option>
+                    <option>2022</option>
+                    <option>2023</option>
+                    <option>2024</option>
+                    <option>2025</option>
+                    <option>2026</option>
+                  </select>
+                </div>
+                <span>—</span>
+                <div class="select-wrap" style="flex:1;min-width:0">
+                  <select id="filterYearTo" aria-label="To year">
+                    <option value="">To</option>
+                    <option>2020</option>
+                    <option>2021</option>
+                    <option>2022</option>
+                    <option>2023</option>
+                    <option>2024</option>
+                    <option>2025</option>
+                    <option>2026</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fuel Type -->
+            <div class="filter-group">
+              <h3>Fuel Type</h3>
+              <label class="filter-check"><input type="checkbox"> Gasoline</label>
+              <label class="filter-check"><input type="checkbox"> Diesel</label>
+              <label class="filter-check"><input type="checkbox"> Electric</label>
+              <label class="filter-check"><input type="checkbox"> Hybrid</label>
+            </div>
+
+            <!-- Transmission -->
+            <div class="filter-group">
+              <h3>Transmission</h3>
+              <label class="filter-check"><input type="checkbox"> Automatic</label>
+              <label class="filter-check"><input type="checkbox"> Manual</label>
+            </div>
+
+            <!-- Actions -->
+            <div class="filter-actions">
+              <button class="btn btn-primary btn-sm">Apply Filters</button>
+              <button class="btn btn-secondary btn-sm">Reset</button>
+            </div>
+          </aside>
+
+          <!-- RESULTS -->
+          <div>
+            <!-- Results header band -->
+            <div class="inv-results-header">
+              <div>
+                <h2 class="h2">Available Vehicles</h2>
+              </div>
+              <div class="inv-meta">
+                <span class="results-count">Loading...</span>
+                <div class="sort-wrap">
+                  <label class="form-label" for="sortSelect">Sort</label>
+                  <div class="select-wrap">
+                    <select id="sortSelect">
+                      <option value="featured">Featured</option>
+                      <option value="price-asc">Price: Low → High</option>
+                      <option value="price-desc">Price: High → Low</option>
+                      <option value="newest">Year: Newest</option>
+                      <option value="mileage">Mileage: Lowest</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active filter chips -->
+            <div id="activeFilters" style="display:none;flex-wrap:wrap;gap:8px;margin-bottom:20px"></div>
+
+            <!-- Grid -->
+            <div class="cars-grid" id="inventoryCars" role="list">
+              <!-- Injected via JS -->
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" role="navigation" aria-label="Pagination">
+              <!-- Injected via JS -->
+            </div>
+
+            <!-- Financing disclaimer -->
+            <p style="text-align:center;font-size:0.625rem;color:var(--text-3);margin-top:24px;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.5">
+              *Monthly estimates based on 60-month financing at average market rates. Actual payments depend on credit, down payment, and dealer terms. Prices shown are dealer-listed and may not include taxes, registration, or fees.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a href="/" class="footer-logo">
+            <i class="fas fa-moon"></i>
+            <span>Night<strong>Drive</strong></span>
+          </a>
+          <p>Restricted collection of high-value machines. Market-verified. No compromise.</p>
+          <div class="footer-socials">
+            <a href="https://github.com/HALF-2300" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-facebook-f"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-instagram"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-x-twitter"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/inventory">Browse Inventory</a></li>
+            <li><a href="/about">About Us</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+            <li><a href="/contact?subject=Financing">Financing</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Vehicle Types</h4>
+          <ul>
+            <li><a href="/inventory?type=Sedan">Sedans</a></li>
+            <li><a href="/inventory?type=SUV">SUVs</a></li>
+            <li><a href="/inventory?type=Coupe">Coupes</a></li>
+            <li><a href="/inventory?type=Pickup">Trucks</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact Info</h4>
+          <ul class="footer-contact">
+            <li><i class="fas fa-map-marker-alt"></i> Portland, OR</li>
+            <li><i class="fas fa-phone"></i> 909 302 240</li>
+            <li><i class="fas fa-envelope"></i> abesannat@gmail.com</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 NightDrive. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <button class="btt" id="btt" aria-label="Back to top"><i class="fas fa-chevron-up"></i></button>
+  <script src="/js/app.js" defer></script>
+  <script defer src="/assets/js/ui.js"></script>
+</body>
+</html>

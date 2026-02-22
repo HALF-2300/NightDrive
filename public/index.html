@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NightDrive — Tonight's best machines. Trusted dealer marketplace. Market-verified pricing, secure transactions.">
+  <meta name="theme-color" content="#050608">
+  <title>NightDrive — Find the Machine Built For You</title>
+  <link rel="canonical" href="https://nightdrive.store/">
+  <meta property="og:title" content="NightDrive — Find the Machine Built For You">
+  <meta property="og:description" content="Tonight's best machines. Verified dealers. Market price analysis. No hidden fees.">
+  <meta property="og:image" content="https://nightdrive.store/images/og-home.jpg">
+  <meta property="og:url" content="https://nightdrive.store/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="NightDrive — Find the Machine Built For You">
+  <meta name="twitter:description" content="Tonight's best machines. Verified dealers. Market price analysis. No hidden fees.">
+  <meta name="twitter:image" content="https://nightdrive.store/images/og-home.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/theme-premium-dark.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- LOCATION MODAL -->
+  <div class="loc-overlay" id="locOverlay">
+    <div class="loc-modal">
+      <div class="loc-icon"><i class="fas fa-location-dot"></i></div>
+      <h2 class="loc-title">Find Cars Near You</h2>
+      <p class="loc-desc">Allow location access to see inventory closest to you, with accurate distances and local pricing.</p>
+      <button class="btn btn-primary loc-btn" id="locAllow"><i class="fas fa-location-crosshairs"></i> Use My Location</button>
+      <div class="loc-divider"><span>or</span></div>
+      <div class="loc-manual">
+        <input type="text" class="loc-input" id="locZipInput" placeholder="Enter ZIP code" maxlength="5" inputmode="numeric" pattern="[0-9]*">
+        <button class="btn btn-secondary loc-btn-zip" id="locZipBtn">Go</button>
+      </div>
+      <button class="loc-skip" id="locSkip">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="logo">
+        <i class="fas fa-moon"></i>
+        <span>Night<strong>Drive</strong></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/" class="active">Home</a></li>
+        <li><a href="/inventory">Inventory</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+      <div class="nav-right">
+        <button class="nav-loc" id="navLocBtn" aria-label="Set location"><i class="fas fa-location-dot"></i> <span id="navLocLabel">Set Location</span></button>
+        <a href="tel:909302240" class="nav-phone"><i class="fas fa-phone"></i> 909 302 240</a>
+        <a href="/inventory" class="btn btn-primary btn-sm">Explore Cars</a>
+      </div>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg hero-bg-image"></div>
+    <div class="hero-smoke"></div>
+    <div class="hero-glow"></div>
+    <div class="container hero-inner">
+      <p class="hero-tag"><i class="fas fa-circle"></i> Tonight's best machines are waiting</p>
+      <h1 class="h1 hero-title">NOT EVERYONE<br><span class="accent">DESERVES THIS CAR.</span></h1>
+      <p class="hero-subtitle">Find the machine built for you. Trusted dealers. Market-verified pricing.</p>
+      <div class="hero-cta">
+        <a href="/inventory" class="btn btn-primary btn-lg"><i class="fas fa-car"></i> Explore Cars</a>
+        <a href="/contact" class="btn btn-secondary btn-lg">Sell Your Car</a>
+      </div>
+
+      <!-- Search Module -->
+      <div class="search-module">
+        <div class="search-tabs">
+          <button class="search-tab active" data-tab="all">All</button>
+          <button class="search-tab" data-tab="new">New</button>
+          <button class="search-tab" data-tab="used">Pre-Owned</button>
+        </div>
+        <div class="search-fields">
+          <div class="search-field">
+            <label class="form-label" for="sMake">Make</label>
+            <div class="select-wrap"><select id="sMake"><option value="">Any make</option><option>Acura</option><option>Audi</option><option>BMW</option><option>Cadillac</option><option>Chevrolet</option><option>Dodge</option><option>Ford</option><option>Genesis</option><option>Honda</option><option>Hyundai</option><option>Jeep</option><option>Kia</option><option>Land Rover</option><option>Lexus</option><option>Maserati</option><option>Mazda</option><option>Mercedes-Benz</option><option>Nissan</option><option>Porsche</option><option>RAM</option><option>Rivian</option><option>Subaru</option><option>Tesla</option><option>Toyota</option><option>Volkswagen</option><option>Volvo</option></select></div>
+          </div>
+          <div class="search-field">
+            <label class="form-label" for="sModel">Model</label>
+            <div class="select-wrap"><select id="sModel"><option value="">Any model</option></select></div>
+          </div>
+          <div class="search-field">
+            <label class="form-label" for="sPrice">Price</label>
+            <div class="select-wrap"><select id="sPrice"><option value="">Any price</option><option value="Under $30,000">Under $30,000</option><option value="$30k-$60k">$30k – $60k</option><option value="$60k-$100k">$60k – $100k</option><option value="$100k+">$100,000+</option></select></div>
+          </div>
+          <div class="search-field">
+            <label class="form-label" for="sType">Body type</label>
+            <div class="select-wrap"><select id="sType"><option value="">Any type</option><option value="Sedan">Sedan</option><option value="SUV">SUV</option><option value="Coupe">Coupe</option><option value="Pickup">Pickup / Truck</option><option value="Convertible">Convertible</option><option value="Hatchback">Hatchback</option><option value="Minivan">Minivan</option><option value="Wagon">Wagon</option></select></div>
+          </div>
+        </div>
+        <div class="search-actions">
+          <button type="button" class="btn btn-primary btn-lg" id="heroSearchBtn"><i class="fas fa-search"></i> Search</button>
+        </div>
+        <!-- Trust strip under search -->
+        <div class="trust-strip">
+          <span><i class="fas fa-check-circle"></i> Verified Dealers</span>
+          <span><i class="fas fa-check-circle"></i> Market Price Analysis</span>
+          <span><i class="fas fa-check-circle"></i> No Hidden Fees</span>
+          <span><i class="fas fa-check-circle"></i> Secure Transactions</span>
+        </div>
+      </div>
+
+      <div class="scroll-hint" aria-hidden="true">
+        <div class="mouse"><div class="wheel"></div></div>
+        <span>Scroll</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRANDS (click to filter inventory by make) -->
+  <div class="brands-bar">
+    <div class="brands-track">
+      <a href="/inventory?make=BMW" class="brand-name">BMW</a><a href="/inventory?make=Mercedes-Benz" class="brand-name">Mercedes-Benz</a><a href="/inventory?make=Audi" class="brand-name">Audi</a><a href="/inventory?make=Porsche" class="brand-name">Porsche</a><a href="/inventory?make=Tesla" class="brand-name">Tesla</a><a href="/inventory?make=Toyota" class="brand-name">Toyota</a><a href="/inventory?make=Honda" class="brand-name">Honda</a><a href="/inventory?make=Ford" class="brand-name">Ford</a><a href="/inventory?make=Lexus" class="brand-name">Lexus</a><a href="/inventory?make=Chevrolet" class="brand-name">Chevrolet</a>
+      <a href="/inventory?make=BMW" class="brand-name">BMW</a><a href="/inventory?make=Mercedes-Benz" class="brand-name">Mercedes-Benz</a><a href="/inventory?make=Audi" class="brand-name">Audi</a><a href="/inventory?make=Porsche" class="brand-name">Porsche</a><a href="/inventory?make=Tesla" class="brand-name">Tesla</a><a href="/inventory?make=Toyota" class="brand-name">Toyota</a><a href="/inventory?make=Honda" class="brand-name">Honda</a><a href="/inventory?make=Ford" class="brand-name">Ford</a><a href="/inventory?make=Lexus" class="brand-name">Lexus</a><a href="/inventory?make=Chevrolet" class="brand-name">Chevrolet</a>
+    </div>
+  </div>
+
+  <main id="main">
+
+  <!-- CARS BEING HUNTED NOW -->
+  <section class="section hunted-section" id="huntedSection">
+    <div class="container">
+      <div class="hunted-header">
+        <h2 class="h2"><i class="fas fa-fire" style="color: var(--accent); margin-right: 8px;"></i> Cars Being Hunted Now</h2>
+        <p class="subtitle">Deals that move fast. Price drops, high demand — view before they're gone.</p>
+      </div>
+      <div class="cars-grid hunted-grid" id="huntedGrid" data-rail="hunted"></div>
+      <div class="hunted-footer">
+        <a href="/inventory" class="btn btn-secondary btn-sm">View all deals <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CURATED FEED -->
+  <section class="section curated-section" id="curatedFeed">
+    <div class="container">
+
+      <div class="feed-header">
+        <div>
+<h2 class="h2">Enter the <span class="text-accent">Collection</span></h2>
+        <p class="subtitle">Curated by value and demand — from <strong class="total-available">millions of</strong> active listings</p>
+        </div>
+        <a href="/inventory" class="btn btn-secondary btn-sm">View full inventory <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+      <!-- Rail: Editor's Picks -->
+      <div class="car-rail">
+        <div class="rail-header">
+          <div class="rail-title">
+            <i class="fas fa-star rail-icon rail-icon-gold"></i>
+            <div>
+              <h3 class="h3">Editor's Picks</h3>
+              <p class="rail-subtitle">Top-scored by value, quality, and freshness</p>
+            </div>
+          </div>
+          <a href="/inventory" class="btn btn-ghost btn-sm">View all <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="cars-grid rail-grid" data-rail="editorPicks"></div>
+      </div>
+
+      <!-- Rail: Hunted Deals -->
+      <div class="car-rail">
+        <div class="rail-header">
+          <div class="rail-title">
+            <i class="fas fa-bolt rail-icon rail-icon-crimson"></i>
+            <div>
+              <h3 class="h3">Hunted Deals</h3>
+              <p class="rail-subtitle">Priced below market — tactical edge</p>
+            </div>
+          </div>
+          <a href="/inventory?sort=value" class="btn btn-ghost btn-sm">View all <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="cars-grid rail-grid" data-rail="bestDeals"></div>
+      </div>
+
+      <!-- Rail: Night Picks -->
+      <div class="car-rail">
+        <div class="rail-header">
+          <div class="rail-title">
+            <i class="fas fa-moon rail-icon rail-icon-amber"></i>
+            <div>
+              <h3 class="h3">Night Picks</h3>
+              <p class="rail-subtitle">Barely driven, well below average for their year</p>
+            </div>
+          </div>
+          <a href="/inventory?sort=mileage" class="btn btn-ghost btn-sm">View all <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="cars-grid rail-grid" data-rail="lowMileage"></div>
+      </div>
+
+      <!-- Rail: High Demand -->
+      <div class="car-rail">
+        <div class="rail-header">
+          <div class="rail-title">
+            <i class="fas fa-fire rail-icon rail-icon-crimson"></i>
+            <div>
+              <h3 class="h3">High Demand</h3>
+              <p class="rail-subtitle">Fresh on the market — high interest tonight</p>
+            </div>
+          </div>
+          <a href="/inventory?sort=newest" class="btn btn-ghost btn-sm">View all <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="cars-grid rail-grid" data-rail="justArrived"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section class="section" style="background:var(--surface-1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="container">
+      <div class="section-top">
+        <div>
+          <h2 class="h2">Why <span class="text-accent">NightDrive</span></h2>
+          <p class="subtitle">Built without compromise. Not your average dealership.</p>
+        </div>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+          <h3 class="h3">Certified Quality</h3>
+          <p>Every vehicle goes through a 150-point inspection. We only list cars that meet our standards.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><i class="fas fa-hand-holding-dollar"></i></div>
+          <h3 class="h3">Fair Pricing</h3>
+          <p>Transparent, competitive pricing with no hidden fees. The price you see is the price you pay.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><i class="fas fa-file-signature"></i></div>
+          <h3 class="h3">Easy Financing</h3>
+          <p>Get pre-approved in minutes with flexible plans from trusted lending partners.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><i class="fas fa-truck-fast"></i></div>
+          <h3 class="h3">Home Delivery</h3>
+          <p>Can't visit us? We deliver to your door within our service area at no extra cost.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><i class="fas fa-rotate-left"></i></div>
+          <h3 class="h3">7-Day Returns</h3>
+          <p>Drive it for a week. If it's not right, bring it back — no questions asked.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><i class="fas fa-headset"></i></div>
+          <h3 class="h3">Dedicated Support</h3>
+          <p>Real people available 7 days a week to help with questions, test drives, and paperwork.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section steps-section">
+    <div class="container">
+      <div class="section-top" style="justify-content:center;text-align:center">
+        <div>
+          <h2 class="h2">How It Works</h2>
+          <p class="subtitle" style="margin:6px auto 0">Four steps from browsing to driving home</p>
+        </div>
+      </div>
+      <div class="steps-grid">
+        <div class="step reveal">
+          <div class="step-icon"><i class="fas fa-magnifying-glass"></i></div>
+          <h3 class="h3">Browse</h3>
+          <p>Search our inventory by make, model, price, or body type.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-icon"><i class="fas fa-car"></i></div>
+          <h3 class="h3">Test drive</h3>
+          <p>Schedule a visit or request a home test drive at your convenience.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-icon"><i class="fas fa-file-contract"></i></div>
+          <h3 class="h3">Finance</h3>
+          <p>Choose a plan that fits your budget. Pre-approval takes minutes.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-icon"><i class="fas fa-key"></i></div>
+          <h3 class="h3">Drive home</h3>
+          <p>Complete paperwork and drive away — or we deliver to your door.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-top" style="justify-content:center;text-align:center">
+        <div>
+          <h2 class="h2">Customer Reviews</h2>
+          <p class="subtitle" style="margin:6px auto 0">What people say after buying from us</p>
+        </div>
+      </div>
+      <div class="testimonials-slider">
+        <div class="testimonials-track" id="testTrack">
+          <div class="testimonial">
+            <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+            <p class="testimonial-text">"The entire process was transparent and straightforward. No pressure, no hidden costs. I found exactly what I was looking for and the financing was handled the same day."</p>
+            <div class="testimonial-author"><div class="author-avatar">JD</div><div><strong>James D.</strong><span>BMW M4 buyer</span></div></div>
+          </div>
+          <div class="testimonial">
+            <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+            <p class="testimonial-text">"I was nervous buying a pre-owned luxury car. The inspection report gave me complete confidence, and the 7-day return policy sealed the deal. Highly recommend."</p>
+            <div class="testimonial-author"><div class="author-avatar">SR</div><div><strong>Sarah R.</strong><span>Mercedes S-Class buyer</span></div></div>
+          </div>
+          <div class="testimonial">
+            <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+            <p class="testimonial-text">"Home delivery was a game-changer. I found my Tesla online, got financing approved the same day, and it was in my driveway by the weekend."</p>
+            <div class="testimonial-author"><div class="author-avatar">MK</div><div><strong>Michael K.</strong><span>Tesla Model S buyer</span></div></div>
+          </div>
+        </div>
+        <div class="slider-controls">
+          <button class="slider-btn" id="prevSlide" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+          <div class="slider-dots" id="sliderDots"></div>
+          <button class="slider-btn" id="nextSlide" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-inner">
+        <div>
+          <h2 class="h2">Ready to own the night?</h2>
+          <p class="subtitle">Step inside. Test drive. No pressure — just power.</p>
+        </div>
+        <div class="cta-actions">
+          <a href="/contact" class="btn btn-primary btn-lg"><i class="fas fa-bolt"></i> Book Test Drive</a>
+          <a href="/inventory" class="btn btn-secondary btn-lg"><i class="fas fa-car"></i> Enter Inventory</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="newsletter-section">
+    <div class="container">
+      <div class="newsletter-box">
+        <div>
+          <h2 class="h2">New machines. <span class="text-accent">First access.</span></h2>
+          <p class="subtitle" style="margin-top:4px">Get notified before anyone else when new beasts hit the market.</p>
+        </div>
+        <div>
+          <form class="newsletter-form" id="newsletterForm">
+            <input type="hidden" name="website" id="newsletterWebsite" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <input type="hidden" name="_t0" id="newsletterFormTime" value="" aria-hidden="true">
+            <input type="email" class="input" placeholder="you@email.com" required aria-label="Email">
+            <button type="submit" class="btn btn-primary">Subscribe</button>
+          </form>
+          <p class="newsletter-hint">No spam. Unsubscribe anytime.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a href="/" class="footer-logo"><i class="fas fa-moon"></i> <span>Night<strong>Drive</strong></span></a>
+          <p>Trusted dealer marketplace. Market-verified pricing. Secure transactions.</p>
+          <div class="footer-socials">
+            <a href="https://github.com/HALF-2300" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="/contact" aria-label="Contact us (Facebook)"><i class="fab fa-facebook-f"></i></a>
+            <a href="/contact" aria-label="Contact us (Instagram)"><i class="fab fa-instagram"></i></a>
+            <a href="/contact" aria-label="Contact us (Twitter)"><i class="fab fa-x-twitter"></i></a>
+            <a href="/contact" aria-label="Contact us (YouTube)"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4>Pages</h4>
+          <ul>
+            <li><a href="/inventory">Inventory</a></li>
+            <li><a href="/about">About us</a></li>
+            <li><a href="/contact">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Browse by type</h4>
+          <ul>
+            <li><a href="/inventory?type=sedan">Sedans</a></li>
+            <li><a href="/inventory?type=suv">SUVs</a></li>
+            <li><a href="/inventory?type=sports">Sports cars</a></li>
+            <li><a href="/inventory?type=electric">Electric</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul class="footer-contact">
+            <li><i class="fas fa-map-marker-alt"></i> Portland, OR</li>
+            <li><i class="fas fa-phone"></i> 909 302 240</li>
+            <li><i class="fas fa-envelope"></i> abesannat@gmail.com</li>
+            <li><i class="fas fa-clock"></i> Mon–Sat 9am–8pm, Sun 10am–6pm</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 NightDrive. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <button class="btt" id="btt" aria-label="Back to top"><i class="fas fa-chevron-up"></i></button>
+
+  <!-- AI Advisor (floating) -->
+  <button class="ai-advisor-btn" id="aiAdvisorBtn" aria-label="Chat with NightDrive Concierge">
+    <i class="fas fa-comments"></i>
+    <span>Concierge</span>
+  </button>
+  <div class="ai-advisor-panel" id="aiAdvisorPanel">
+    <div class="ai-advisor-header">
+      <h3>NightDrive Concierge</h3>
+      <button class="ai-advisor-close" id="aiAdvisorClose" aria-label="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ai-advisor-body">
+      <p class="ai-advisor-welcome">Tell me what you're looking for — budget, body type, or brand — and I'll suggest the best deals tonight.</p>
+      <div class="ai-chat-out" id="chatOut" role="log" aria-live="polite"></div>
+      <div class="ai-chat-composer">
+        <input type="text" id="chatInput" class="ai-chat-input" placeholder="e.g. SUVs under $50k" autocomplete="off" aria-label="Message to advisor">
+        <button type="button" id="sendBtn" class="ai-chat-send" disabled aria-label="Send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script defer src="/assets/js/ui.js"></script>
+</body>
+</html>

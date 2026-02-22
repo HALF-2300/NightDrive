@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nightdrive.store/sitemap.xml
+
+# Disallow API and admin from indexing
+Disallow: /api/
+Disallow: /admin

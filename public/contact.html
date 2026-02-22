@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact NightDrive — schedule a test drive, get financing help, or visit our showroom.">
+  <meta name="theme-color" content="#050608">
+  <title>Contact Us — NightDrive</title>
+  <link rel="canonical" href="https://nightdrive.store/contact">
+  <meta property="og:title" content="Contact Us — NightDrive">
+  <meta property="og:description" content="Contact NightDrive — schedule a test drive, get financing help, or visit our showroom.">
+  <meta property="og:image" content="https://nightdrive.store/images/og-contact.jpg">
+  <meta property="og:url" content="https://nightdrive.store/contact">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Contact Us — NightDrive">
+  <meta name="twitter:description" content="Contact NightDrive — schedule a test drive, get financing help, or visit our showroom.">
+  <meta name="twitter:image" content="https://nightdrive.store/images/og-contact.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/theme-premium-dark.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- LOCATION MODAL -->
+  <div class="loc-overlay" id="locOverlay">
+    <div class="loc-modal">
+      <div class="loc-icon"><i class="fas fa-location-dot"></i></div>
+      <h2 class="loc-title">Find Cars Near You</h2>
+      <p class="loc-desc">Allow location access to see inventory closest to you, with accurate distances and local pricing.</p>
+      <button class="btn btn-primary loc-btn" id="locAllow"><i class="fas fa-location-crosshairs"></i> Use My Location</button>
+      <div class="loc-divider"><span>or</span></div>
+      <div class="loc-manual">
+        <input type="text" class="loc-input" id="locZipInput" placeholder="Enter ZIP code" maxlength="5" inputmode="numeric" pattern="[0-9]*">
+        <button class="btn btn-secondary loc-btn-zip" id="locZipBtn">Go</button>
+      </div>
+      <button class="loc-skip" id="locSkip">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar scrolled" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="logo">
+        <i class="fas fa-moon"></i>
+        <span>Night<strong>Drive</strong></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/inventory">Inventory</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact" class="active">Contact</a></li>
+      </ul>
+      <div class="nav-right">
+        <button class="nav-loc" id="navLocBtn" aria-label="Set location"><i class="fas fa-location-dot"></i> <span id="navLocLabel">Set Location</span></button>
+        <a href="tel:909302240" class="nav-phone"><i class="fas fa-phone"></i> 909 302 240</a>
+        <a href="/inventory" class="btn btn-primary btn-sm">Browse Cars</a>
+      </div>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO — same impressive ground as Home (car behind) -->
+  <section class="hero-page">
+    <div class="hero-page-bg"></div>
+    <div class="hero-page-glow"></div>
+    <div class="container hero-page-inner">
+      <h1 class="h1">Contact <span class="text-accent">Us</span></h1>
+      <p class="hero-page-subtitle">We'd love to hear from you. Reach out anytime.</p>
+      <div class="breadcrumb">
+        <a href="/">Home</a>
+        <span class="sep">/</span>
+        <span class="current">Contact</span>
+      </div>
+    </div>
+  </section>
+
+  <main id="main">
+    <!-- CONTACT SECTION -->
+    <section class="section">
+      <div class="container">
+        <div class="contact-grid">
+          <!-- CONTACT INFO -->
+          <div class="contact-info">
+            <h2 class="h2">Get in <span class="text-accent">Touch</span></h2>
+            <p>
+              Whether you have a question about a vehicle, need financing help, or want to schedule a test drive — our team is ready to assist you.
+            </p>
+
+            <div class="contact-items">
+              <div class="contact-item">
+                <div class="contact-item-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div>
+                  <h4>Visit Our Showroom</h4>
+                  <p>Portland, OR</p>
+                </div>
+              </div>
+              <div class="contact-item">
+                <div class="contact-item-icon"><i class="fas fa-phone"></i></div>
+                <div>
+                  <h4>Call Us</h4>
+                  <p>909 302 240</p>
+                </div>
+              </div>
+              <div class="contact-item">
+                <div class="contact-item-icon"><i class="fas fa-envelope"></i></div>
+                <div>
+                  <h4>Email Us</h4>
+                  <p>abesannat@gmail.com</p>
+                </div>
+              </div>
+              <div class="contact-item">
+                <div class="contact-item-icon"><i class="fas fa-clock"></i></div>
+                <div>
+                  <h4>Working Hours</h4>
+                  <p>Mon - Sat: 9:00 AM - 8:00 PM<br>Sunday: 10:00 AM - 6:00 PM</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="contact-map" style="flex-direction:column;gap:8px">
+              <i class="fas fa-map" style="font-size:1.5rem;opacity:0.6"></i>
+              <span>Visit us in Portland, OR — or message us to schedule a visit.</span>
+              <a href="https://www.google.com/maps/search/?api=1&query=Portland+OR" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="margin-top:4px">
+                <i class="fas fa-external-link-alt"></i> Open in Google Maps
+              </a>
+            </div>
+          </div>
+
+          <!-- CONTACT FORM -->
+          <div class="contact-form">
+            <h3 class="h3">Send Us a Message</h3>
+            <form id="contactForm">
+              <input type="hidden" name="website" id="contactWebsite" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
+              <input type="hidden" name="_t0" id="contactFormTime" value="" aria-hidden="true">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">First Name *</label>
+                  <input type="text" class="input" placeholder="John" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name *</label>
+                  <input type="text" class="input" placeholder="Doe" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Email *</label>
+                  <input type="email" class="input" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone</label>
+                  <input type="tel" class="input" placeholder="909 302 240">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Subject</label>
+                <div class="select-wrap">
+                  <select>
+                    <option value="">Select a subject</option>
+                    <option>General Inquiry</option>
+                    <option>Schedule Test Drive</option>
+                    <option>Financing Question</option>
+                    <option>Trade-In Inquiry</option>
+                    <option>Service Appointment</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Interested Vehicle (Optional)</label>
+                <input type="text" class="input" placeholder="e.g. 2026 BMW M4 Competition">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Message *</label>
+                <textarea class="input" placeholder="Tell us how we can help you..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-lg" style="width:100%">
+                <i class="fas fa-paper-plane"></i> Send Message
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="section" style="background:var(--surface-1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+      <div class="container">
+        <div class="section-top" style="justify-content:center;text-align:center">
+          <div>
+            <span class="label">FAQ</span>
+            <h2 class="h2" style="margin-top:8px">Frequently Asked <span class="text-accent">Questions</span></h2>
+            <p class="subtitle" style="margin:6px auto 0">Quick answers to common questions</p>
+          </div>
+        </div>
+        <div style="max-width:800px;margin:0 auto">
+          <div class="faq-item">
+            <div class="faq-head">
+              <h4>Do you offer financing options?</h4>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <p class="faq-answer">
+              Yes! We offer flexible financing options through multiple lending partners. You can get pre-approved online in minutes, and our finance team will work with you to find the best plan for your budget.
+            </p>
+          </div>
+          <div class="faq-item">
+            <div class="faq-head">
+              <h4>Can I trade in my current vehicle?</h4>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <p class="faq-answer">
+              Absolutely! We accept trade-ins and offer competitive valuations. You can get an instant estimate online or bring your vehicle in for a professional assessment.
+            </p>
+          </div>
+          <div class="faq-item">
+            <div class="faq-head">
+              <h4>Do you deliver vehicles?</h4>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <p class="faq-answer">
+              Yes, we offer complimentary home delivery within a 100-mile radius. For longer distances, we can arrange affordable shipping to your doorstep.
+            </p>
+          </div>
+          <div class="faq-item">
+            <div class="faq-head">
+              <h4>What warranty do your vehicles come with?</h4>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <p class="faq-answer">
+              All our new vehicles come with full manufacturer warranty. Our certified pre-owned vehicles include an extended warranty of up to 2 years or 24,000 miles. Additional extended warranty options are available.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-inner">
+          <div>
+            <h2 class="h2">Ready to find your car?</h2>
+            <p class="subtitle">Schedule a visit or start browsing — no pressure, no obligation.</p>
+          </div>
+          <div class="cta-actions">
+            <a href="/inventory" class="btn btn-primary btn-lg"><i class="fas fa-car"></i> Browse inventory</a>
+            <a href="tel:909302240" class="btn btn-secondary btn-lg">Call us</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a href="/" class="footer-logo"><i class="fas fa-moon"></i> <span>Night<strong>Drive</strong></span></a>
+          <p>Verified vehicles, transparent pricing, and support you can count on.</p>
+          <div class="footer-socials">
+            <a href="https://github.com/HALF-2300" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-facebook-f"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-instagram"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-x-twitter"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4>Pages</h4>
+          <ul>
+            <li><a href="/inventory">Inventory</a></li>
+            <li><a href="/about">About us</a></li>
+            <li><a href="/contact">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Browse by type</h4>
+          <ul>
+            <li><a href="/inventory?type=sedan">Sedans</a></li>
+            <li><a href="/inventory?type=suv">SUVs</a></li>
+            <li><a href="/inventory?type=sports">Sports cars</a></li>
+            <li><a href="/inventory?type=electric">Electric</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul class="footer-contact">
+            <li><i class="fas fa-map-marker-alt"></i> Portland, OR</li>
+            <li><i class="fas fa-phone"></i> 909 302 240</li>
+            <li><i class="fas fa-envelope"></i> abesannat@gmail.com</li>
+            <li><i class="fas fa-clock"></i> Mon–Sat 9am–8pm, Sun 10am–6pm</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 NightDrive. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <button class="btt" id="btt" aria-label="Back to top"><i class="fas fa-chevron-up"></i></button>
+  <script src="/js/app.js"></script>
+  <script defer src="/assets/js/ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Caddy: auto TLS + HTTP→HTTPS + canonical host + proxy to Node.
+# Run: caddy run --config ops/Caddyfile (or adapt path).
+# Replace nightdrive.store and :1335 if needed.
+
+nightdrive.store, www.nightdrive.store {
+    @www host www.nightdrive.store
+    handle @www {
+        redir https://nightdrive.store{uri} permanent
+    }
+
+    handle {
+        reverse_proxy 127.0.0.1:1335
+    }
+}
+
+# Optional: redirect HTTP to HTTPS (Caddy often handles this automatically when using above block)
+# http://nightdrive.store {
+#     redir https://nightdrive.store{uri} permanent
+# }

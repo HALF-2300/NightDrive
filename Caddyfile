@@ -1,0 +1,82 @@
+# AutoElite — Caddy Reverse Proxy Configuration
+# Usage: caddy run --config Caddyfile
+#
+# For local development:
+#   Replace autoelite.com with localhost:443 or your local domain
+#
+# For production:
+#   Set your actual domain — Caddy auto-provisions HTTPS via Let's Encrypt
+
+autoelite.com {
+	# Automatic HTTPS (Let's Encrypt)
+	# Caddy handles certificate provisioning, renewal, and OCSP stapling
+
+	# Gzip + Brotli compression (Caddy handles this natively)
+	encode zstd gzip
+
+	# Security headers (supplements server.js headers)
+	header {
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		Permissions-Policy "geolocation=(), camera=(), microphone=()"
+		-Server
+	}
+
+	# Health check for monitoring
+	handle /health {
+		reverse_proxy localhost:1335
+	}
+
+	# API proxy with rate limiting headers forwarded
+	handle /api/* {
+		reverse_proxy localhost:1335 {
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+			transport http {
+				read_timeout 30s
+				write_timeout 30s
+			}
+		}
+	}
+
+	# Static assets with aggressive caching
+	@static {
+		path *.css *.js *.png *.jpg *.jpeg *.gif *.svg *.ico *.webp *.woff *.woff2
+	}
+	handle @static {
+		header Cache-Control "public, max-age=31536000, immutable"
+		reverse_proxy localhost:1335
+	}
+
+	# All other requests
+	handle {
+		reverse_proxy localhost:1335 {
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
+	# Access log
+	log {
+		output file /var/log/caddy/autoelite-access.log {
+			roll_size 50MiB
+			roll_keep 10
+			roll_keep_for 30d
+		}
+		format json
+	}
+}
+
+# HTTP → HTTPS redirect (automatic with Caddy, but explicit for clarity)
+http://autoelite.com {
+	redir https://autoelite.com{uri} permanent
+}
+
+# www redirect
+www.autoelite.com {
+	redir https://autoelite.com{uri} permanent
+}

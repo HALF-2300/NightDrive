@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View detailed specifications, pricing, and Smart Deal score at NightDrive.">
+  <meta name="theme-color" content="#050608">
+  <title>Vehicle Details — NightDrive</title>
+  <link rel="canonical" href="https://nightdrive.store/car-details">
+  <meta property="og:title" content="Vehicle Details — NightDrive">
+  <meta property="og:description" content="Market-verified pricing. Smart Deal score. Reserve or compare at NightDrive.">
+  <meta property="og:image" content="https://nightdrive.store/images/og-car.jpg">
+  <meta property="og:url" content="https://nightdrive.store/car-details">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Vehicle Details — NightDrive">
+  <meta name="twitter:description" content="Market-verified pricing. Smart Deal score. Reserve or compare at NightDrive.">
+  <meta name="twitter:image" content="https://nightdrive.store/images/og-car.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/theme-premium-dark.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- LOCATION MODAL -->
+  <div class="loc-overlay" id="locOverlay">
+    <div class="loc-modal">
+      <div class="loc-icon"><i class="fas fa-location-dot"></i></div>
+      <h2 class="loc-title">Find Cars Near You</h2>
+      <p class="loc-desc">Allow location access to see inventory closest to you, with accurate distances and local pricing.</p>
+      <button class="btn btn-primary loc-btn" id="locAllow"><i class="fas fa-location-crosshairs"></i> Use My Location</button>
+      <div class="loc-divider"><span>or</span></div>
+      <div class="loc-manual">
+        <input type="text" class="loc-input" id="locZipInput" placeholder="Enter ZIP code" maxlength="5" inputmode="numeric" pattern="[0-9]*">
+        <button class="btn btn-secondary loc-btn-zip" id="locZipBtn">Go</button>
+      </div>
+      <button class="loc-skip" id="locSkip">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar scrolled" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="logo">
+        <i class="fas fa-moon"></i>
+        <span>Night<strong>Drive</strong></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/inventory" class="active">Inventory</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+      <div class="nav-right">
+        <button class="nav-loc" id="navLocBtn" aria-label="Set location"><i class="fas fa-location-dot"></i> <span id="navLocLabel">Set Location</span></button>
+        <a href="tel:909302240" class="nav-phone"><i class="fas fa-phone"></i> 909 302 240</a>
+        <a href="/inventory" class="btn btn-primary btn-sm">Explore Cars</a>
+      </div>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO — same impressive ground as Home (car behind) -->
+  <section class="hero-page">
+    <div class="hero-page-bg"></div>
+    <div class="hero-page-glow"></div>
+    <div class="container hero-page-inner">
+      <h1 class="h1" id="detailHeroTitle">Vehicle</h1>
+      <div class="breadcrumb">
+        <a href="/">Home</a>
+        <span class="sep">/</span>
+        <a href="/inventory">Inventory</a>
+        <span class="sep">/</span>
+        <span class="current" id="detailBreadCurrent">Listing</span>
+      </div>
+    </div>
+  </section>
+
+  <main id="main">
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <div class="detail-layout">
+
+          <!-- LEFT: Gallery & Tabs -->
+          <div>
+            <div class="gallery-main" id="mainImage" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.25); font-size: 4rem;">
+              <i class="fas fa-car"></i>
+            </div>
+            <div class="gallery-thumbs">
+              <div class="gallery-thumb active" style="background: linear-gradient(135deg, #1a1a2e, #0f3460); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3);"><i class="fas fa-car"></i></div>
+              <div class="gallery-thumb" style="background: linear-gradient(135deg, #2d1b69, #11998e); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3);"><i class="fas fa-car-side"></i></div>
+              <div class="gallery-thumb" style="background: linear-gradient(135deg, #c31432, #240b36); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3);"><i class="fas fa-gauge-high"></i></div>
+              <div class="gallery-thumb" style="background: linear-gradient(135deg, #0f0c29, #302b63); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3);"><i class="fas fa-couch"></i></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-nav">
+              <button class="tab-btn active" data-tab="overview">Overview</button>
+              <button class="tab-btn" data-tab="specifications">Specifications</button>
+              <button class="tab-btn" data-tab="features">Features</button>
+            </div>
+
+            <div class="tab-content active" id="tab-overview">
+              <h3 class="h3" style="margin-bottom: 16px;">About This Vehicle</h3>
+              <p class="body-lg" style="color: var(--text-2); line-height: 1.8; margin-bottom: 16px;">
+                Experience the pinnacle of driving performance with the 2026 BMW M4 Competition. This stunning vehicle combines aggressive styling with heart-pounding performance, featuring BMW's legendary inline-6 twin-turbo engine producing 503 horsepower.
+              </p>
+              <p class="body-lg" style="color: var(--text-2); line-height: 1.8; margin-bottom: 16px;">
+                Every detail has been crafted for the driving enthusiast — from the carbon fiber roof to the adaptive M suspension, from the M Sport exhaust to the head-up display. This is not just a car; it's an experience.
+              </p>
+              <p class="body-lg" style="color: var(--text-2); line-height: 1.8;">
+                Finished in a breathtaking Isle of Man Green metallic with full Merino leather interior, this particular example comes with the Executive Package, M Carbon Exterior Package, and the M Driver's Package for an elevated top speed.
+              </p>
+            </div>
+
+            <div class="tab-content" id="tab-specifications">
+              <h3 class="h3" style="margin-bottom: 20px;">Full Specifications</h3>
+              <table class="spec-table">
+                <tr><td>Engine</td><td>3.0L Twin-Turbo I6</td></tr>
+                <tr><td>Horsepower</td><td>503 HP</td></tr>
+                <tr><td>Transmission</td><td>8-Speed Automatic</td></tr>
+                <tr><td>Drivetrain</td><td>RWD</td></tr>
+                <tr><td>0-60 mph</td><td>3.8 seconds</td></tr>
+                <tr><td>Mileage</td><td>1,250 miles</td></tr>
+                <tr><td>Torque</td><td>479 lb-ft @ 2,750 RPM</td></tr>
+                <tr><td>Top Speed</td><td>180 mph (with M Driver's Package)</td></tr>
+                <tr><td>Fuel Economy</td><td>16 City / 23 Hwy / 19 Combined</td></tr>
+                <tr><td>Curb Weight</td><td>3,830 lbs</td></tr>
+                <tr><td>Wheelbase</td><td>112.2 in</td></tr>
+                <tr><td>Cargo Volume</td><td>12.4 cu ft</td></tr>
+              </table>
+            </div>
+
+            <div class="tab-content" id="tab-features">
+              <h3 class="h3" style="margin-bottom: 20px;">Features & Options</h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> Adaptive M Suspension
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> M Carbon Ceramic Brakes
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> Carbon Fiber Roof
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> Head-Up Display
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> Harman Kardon Audio
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> 360° Camera System
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> Wireless Apple CarPlay
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> Heated & Ventilated Seats
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> Lane Departure Warning
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> Parking Assist Plus
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> M Sport Exhaust
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; color: var(--text-2); font-size: 0.9rem;">
+                  <i class="fas fa-check" style="color: var(--accent);"></i> M Driver's Package
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Detail Info Sidebar -->
+          <aside class="detail-info">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <span class="badge badge-new">New</span>
+              <span class="badge badge-cert">Certified</span>
+            </div>
+            <h2 class="h2">2026 BMW M4 Competition</h2>
+            <p class="detail-subtitle">Coupe — Isle of Man Green Metallic</p>
+            <div class="detail-price" id="detailPrice">$82,900</div>
+            <p class="detail-est" id="detailEst">Est. $1,245/mo with financing</p>
+
+            <div class="detail-smart-deal" id="detailSmartDeal"></div>
+            <div class="detail-pressure" id="detailPressure"></div>
+
+            <div class="detail-specs">
+              <div class="detail-spec">
+                <i class="fas fa-road"></i>
+                <div>
+                  <span class="detail-spec-label">Mileage</span>
+                  <span class="detail-spec-value">1,250 mi</span>
+                </div>
+              </div>
+              <div class="detail-spec">
+                <i class="fas fa-gears"></i>
+                <div>
+                  <span class="detail-spec-label">Transmission</span>
+                  <span class="detail-spec-value">8-Speed Auto</span>
+                </div>
+              </div>
+              <div class="detail-spec">
+                <i class="fas fa-gauge-high"></i>
+                <div>
+                  <span class="detail-spec-label">Power</span>
+                  <span class="detail-spec-value">503 HP</span>
+                </div>
+              </div>
+              <div class="detail-spec">
+                <i class="fas fa-engine"></i>
+                <div>
+                  <span class="detail-spec-label">Engine</span>
+                  <span class="detail-spec-value">3.0L Twin-Turbo I6</span>
+                </div>
+              </div>
+              <div class="detail-spec">
+                <i class="fas fa-gauge-high"></i>
+                <div>
+                  <span class="detail-spec-label">0-60 mph</span>
+                  <span class="detail-spec-value">3.8s</span>
+                </div>
+              </div>
+              <div class="detail-spec">
+                <i class="fas fa-car-side"></i>
+                <div>
+                  <span class="detail-spec-label">Drivetrain</span>
+                  <span class="detail-spec-value">RWD</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-btns">
+              <a href="/contact?car=id" class="btn btn-primary btn-lg" id="detailReserveBtn">
+                <i class="fas fa-bolt"></i> Reserve This Car Now
+              </a>
+              <a href="/inventory" class="btn btn-secondary btn-lg" id="detailCompareBtn">
+                <i class="fas fa-code-compare"></i> Compare Similar Cars
+              </a>
+              <button type="button" class="btn btn-ghost btn-sm detail-notify-btn" id="detailNotifyBtn">
+                <i class="fas fa-bell"></i> Notify me if price drops
+              </button>
+              <p class="detail-reserve-hint">Fully refundable reservation.</p>
+            </div>
+
+            <div class="detail-contact">
+              <h4><i class="fas fa-headset" style="color: var(--accent); margin-right: 8px;"></i> Need Help?</h4>
+              <ul>
+                <li><i class="fas fa-phone"></i> 909 302 240</li>
+                <li><i class="fas fa-envelope"></i> abesannat@gmail.com</li>
+                <li><i class="fas fa-clock"></i> Mon–Sat 9am–8pm, Sun 10am–6pm</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+
+        <!-- SIMILAR VEHICLES -->
+        <div style="margin-top: 80px;">
+          <div class="section-top">
+            <h2 class="h2"><i class="fas fa-fire" style="color: var(--accent); margin-right: 8px;"></i> Similar Cars You May Prefer</h2>
+          </div>
+          <div class="cars-grid" id="similarCars">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a href="/" class="footer-logo"><i class="fas fa-moon"></i> <span>Night<strong>Drive</strong></span></a>
+          <p>Verified vehicles, transparent pricing, and support you can count on.</p>
+          <div class="footer-socials">
+            <a href="https://github.com/HALF-2300" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-facebook-f"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-instagram"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-x-twitter"></i></a>
+            <a href="/contact" aria-label="Contact us"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4>Pages</h4>
+          <ul>
+            <li><a href="/inventory">Inventory</a></li>
+            <li><a href="/about">About us</a></li>
+            <li><a href="/contact">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Browse by type</h4>
+          <ul>
+            <li><a href="/inventory?type=sedan">Sedans</a></li>
+            <li><a href="/inventory?type=suv">SUVs</a></li>
+            <li><a href="/inventory?type=sports">Sports cars</a></li>
+            <li><a href="/inventory?type=electric">Electric</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul class="footer-contact">
+            <li><i class="fas fa-map-marker-alt"></i> Portland, OR</li>
+            <li><i class="fas fa-phone"></i> 909 302 240</li>
+            <li><i class="fas fa-envelope"></i> abesannat@gmail.com</li>
+            <li><i class="fas fa-clock"></i> Mon–Sat 9am–8pm, Sun 10am–6pm</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 NightDrive. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <button class="btt" id="btt" aria-label="Back to top"><i class="fas fa-chevron-up"></i></button>
+  <script src="/js/app.js" defer></script>
+  <script defer src="/assets/js/ui.js"></script>
+</body>
+</html>

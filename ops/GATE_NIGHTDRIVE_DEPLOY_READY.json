@@ -1,0 +1,82 @@
+{
+  "gate_id": "GATE-ND-DEPLOY-01",
+  "app": "NightDrive / AutoElite",
+  "date": "2026-02-18",
+  "purpose": "Production deployment readiness gate (GO/NO-GO) for public launch.",
+  "target": {
+    "public_base_url": "https://nightdrive.store",
+    "canonical_host": "nightdrive.store",
+    "health_url": "https://nightdrive.store/health",
+    "api_health_url": "https://nightdrive.store/api/health",
+    "readiness_url": "https://nightdrive.store/api/readiness"
+  },
+  "policies": {
+    "prod_requires_env": ["NODE_ENV", "ADMIN_TOKEN", "MARKETCHECK_API_KEY", "ALLOWED_ORIGINS"],
+    "cors": {
+      "allow_reflection": false,
+      "allow_wildcard": false,
+      "allowed_origins_must_include": ["https://nightdrive.store"]
+    },
+    "https": {
+      "must_redirect_http_to_https": true,
+      "must_enforce_canonical_host": true
+    }
+  },
+  "checks": [
+    {
+      "id": "P0-ENV-001",
+      "priority": "P0",
+      "name": "Fail-start in production if required env missing",
+      "type": "runtime",
+      "how": "Start server with NODE_ENV=production and missing ADMIN_TOKEN / MARKETCHECK_API_KEY / ALLOWED_ORIGINS.",
+      "command": "NODE_ENV=production node server.js",
+      "expect": "Process exits non-zero AND logs a clear missing-env error.",
+      "fail_message": "Server starts in production with missing required env."
+    },
+    {
+      "id": "P0-CORS-001",
+      "priority": "P0",
+      "name": "CORS is fail-closed (no reflection) for unknown origins",
+      "type": "runtime",
+      "how": "Send Origin header from an untrusted domain.",
+      "command": "curl -s -i -H \"Origin: https://evil.example\" https://nightdrive.store/api/health",
+      "expect": "No Access-Control-Allow-Origin header for evil origin (or 403).",
+      "fail_message": "CORS reflects arbitrary origins."
+    },
+    {
+      "id": "P0-ADMIN-001",
+      "priority": "P0",
+      "name": "Admin endpoints reject missing/invalid token",
+      "type": "runtime",
+      "how": "Call an admin endpoint without Authorization header.",
+      "command": "curl -s -o /dev/null -w \"%{http_code}\" https://nightdrive.store/api/admin/stats",
+      "expect": "401",
+      "fail_message": "Admin endpoint accessible without valid token."
+    },
+    {
+      "id": "P1-HTTPS-001",
+      "priority": "P1",
+      "name": "HTTP redirects to HTTPS",
+      "type": "runtime",
+      "how": "Request the http:// URL.",
+      "command": "curl -s -o /dev/null -w \"%{http_code}\" -I http://nightdrive.store/",
+      "expect": "301 or 308",
+      "fail_message": "No HTTP→HTTPS redirect."
+    },
+    {
+      "id": "P1-READY-001",
+      "priority": "P1",
+      "name": "Readiness endpoint returns JSON with checks",
+      "type": "runtime",
+      "how": "Hit /api/readiness.",
+      "command": "curl -s https://nightdrive.store/api/readiness",
+      "expect": "JSON with ok and checks (env, dataDir, logsDir, marketcheck).",
+      "fail_message": "Readiness endpoint missing or malformed."
+    }
+  ],
+  "go_criteria": {
+    "required_pass": ["P0-ENV-001", "P0-CORS-001", "P0-ADMIN-001"],
+    "recommended_pass": ["P1-HTTPS-001", "P1-READY-001"],
+    "notes": "NO-GO if any required_pass fails. GO if all required_pass pass AND app is behind TLS with canonical host."
+  }
+}

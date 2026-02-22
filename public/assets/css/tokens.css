@@ -1,0 +1,80 @@
+/* ========================================
+   AutoElite — Dark Predator Design Tokens
+   v4.0 — Predator Mode
+   ======================================== */
+
+:root {
+  /* ===== Brand Core — Abyss ===== */
+  --bg-0: #050608;
+  --bg-1: #0a0406;
+  --surface-0: rgba(255,255,255,0.02);
+  --surface-1: rgba(255,255,255,0.04);
+  --surface-2: rgba(255,255,255,0.06);
+
+  --border: rgba(255,255,255,0.06);
+  --border-strong: rgba(255,45,45,0.18);
+
+  --text-0: rgba(255,255,255,0.90);
+  --text-1: rgba(255,255,255,0.68);
+  --text-2: rgba(255,255,255,0.42);
+
+  /* Accents — Blood Red + Predator Glow */
+  --accent: #ff2d2d;
+  --accent-2: #ff6b6b;
+  --gold: #F5C76B;
+
+  /* Status */
+  --ok: #10B981;
+  --warn: #F59E0B;
+  --danger: #EF4444;
+
+  /* Glow */
+  --glow-red: 0 0 40px rgba(255,45,45,0.15), 0 0 80px rgba(255,45,45,0.05);
+  --glow-red-strong: 0 0 30px rgba(255,45,45,0.3), 0 0 60px rgba(255,45,45,0.12);
+
+  /* ===== Typography ===== */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --fs-0: 12px;
+  --fs-1: 14px;
+  --fs-2: 16px;
+  --fs-3: 18px;
+  --fs-4: 22px;
+  --fs-5: 28px;
+  --fs-6: 40px;
+
+  --lh: 1.55;
+  --tracking: -0.01em;
+
+  /* ===== Spacing ===== */
+  --s-0: 6px;
+  --s-1: 10px;
+  --s-2: 14px;
+  --s-3: 18px;
+  --s-4: 24px;
+  --s-5: 32px;
+  --s-6: 44px;
+  --s-7: 64px;
+
+  /* ===== Radius ===== */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+
+  /* ===== Shadow ===== */
+  --shadow-sm: 0 10px 26px rgba(0,0,0,0.5);
+  --shadow-md: 0 16px 44px rgba(0,0,0,0.6);
+  --shadow-lg: 0 26px 70px rgba(0,0,0,0.7);
+
+  /* ===== Motion ===== */
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --dur-fast: 160ms;
+  --dur: 280ms;
+  --dur-slow: 500ms;
+
+  /* ===== Focus ===== */
+  --ring: rgba(255,45,45,0.3);
+}
