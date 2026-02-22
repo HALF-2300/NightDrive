@@ -166,7 +166,8 @@ In Cloudflare **Rules** → **Page Rules** (or **Redirect Rules**): redirect `ht
 1. Go to **[render.com](https://render.com)** and sign in with **GitHub**.
 2. **New** → **Web Service**.
 3. Connect repo **HALF-2300/NightDrive** (so every push to GitHub can trigger a deploy).
-4. **Root Directory:** leave **empty** (repo root has `server.js`; there is no `backend` folder).  
+4. **Environment:** use **Native Environment** (not Docker). This repo has no Dockerfile; if Render is set to Docker it will fail with "failed to read dockerfile".  
+   **Root Directory:** leave **empty** (repo root has `server.js`; there is no `backend` folder).  
    **Build command:** `npm install`  
    **Start command:** `npm start` (do not override; the app binds to `PORT` from the environment)  
    **Instance type:** Free (or paid for persistent disk).
