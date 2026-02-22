@@ -4,6 +4,14 @@ The site is configured for **nightdrive.store** (canonicals, sitemap, robots).
 
 ---
 
+## Prefer a host where env keys “just work”?
+
+**Railway** is often the smoothest: add `MARKETCHECK_API_KEY` (and other env vars) in the dashboard, redeploy once, and the app reads them. No port quirks; they inject `PORT` automatically. Free tier: [railway.app](https://railway.app) → New Project → Deploy from GitHub → **HALF-2300/NightDrive** → add Variables → Generate Domain. Then set `public/config.js` → `window.ND_API_BASE` to the Railway URL.
+
+**Fly.io** is another option: env vars in `fly secrets set MARKETCHECK_API_KEY=xxx` or in the dashboard; deploy with `fly launch` then `fly deploy`. Good for Node and keys apply on next deploy.
+
+---
+
 ## Cars not loading on Cloudflare Pages?
 
 The frontend (Pages) must call your **Node backend** (Render or Railway). In **`public/config.js`** set:
@@ -90,8 +98,8 @@ In Cloudflare **Rules** → **Page Rules** (or **Redirect Rules**): redirect `ht
    - `NODE_ENV` = `production`
    - `MARKETCHECK_API_KEY` = (your key)
    - `ADMIN_TOKEN` = (strong random string)
-   - `ALLOWED_ORIGINS` = `https://YOUR-APP.up.railway.app` (Railway will show the URL; use that, or your custom domain later)
-6. Under **Settings** → **Networking** → **Generate Domain** to get a public URL.
+   - `ALLOWED_ORIGINS` = `https://YOUR-APP.up.railway.app,https://nightdrive.store,https://nightdrive-795.pages.dev` (so Cloudflare Pages can call the API)
+6. Under **Settings** → **Networking** → **Generate Domain** to get a public URL. Put that URL in **`public/config.js`** as `window.ND_API_BASE`, then run `npm run deploy:web` so the frontend uses it.
 
 **Serverless note:** Railway has persistent disk on paid plans. For free tier, set **LEAD_WEBHOOK_URL** (e.g. Zapier webhook) so you don’t lose leads.
 
