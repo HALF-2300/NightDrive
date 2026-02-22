@@ -1,0 +1,9 @@
+# Render Blueprint — NightDrive backend (Native Node)
+# https://docs.render.com/blueprint-spec
+# Add MARKETCHECK_API_KEY, ADMIN_TOKEN, ALLOWED_ORIGINS in Render Dashboard → Environment
+services:
+  - type: web
+    name: NightDrive
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
