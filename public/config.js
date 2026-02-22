@@ -7,4 +7,6 @@
  *   Render:  window.ND_API_BASE = 'https://nightdrive.onrender.com';
  *   Railway: window.ND_API_BASE = 'https://nightdrive-production-xxxx.up.railway.app';
  */
-window.ND_API_BASE = '';  // <-- Set to your backend URL (e.g. from Render or Railway)
+// Backend URL so the frontend (Pages) can load cars. No trailing slash.
+// If you use Railway instead, replace with your Railway URL (e.g. https://nightdrive-production-xxxx.up.railway.app).
+window.ND_API_BASE = 'https://nightdrive.onrender.com';
