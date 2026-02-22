@@ -24,6 +24,34 @@ Use the exact URL Render or Railway gives you (e.g. `https://nightdrive.onrender
 
 ---
 
+## Render: where to go and add your domain
+
+You’re on the **Architecture** view and **NightDrive** is Online. Do this next:
+
+1. **Open the NightDrive service**  
+   Click the **NightDrive** card (the box that says “NightDrive” and “Online”). That opens the **service dashboard** for that app.
+
+2. **Get your backend URL**  
+   At the top of the service page you’ll see the service URL, e.g. `https://nightdrive-xxxx.onrender.com`. Copy it. You’ll use it in **`public/config.js`** as `window.ND_API_BASE` so the frontend (Cloudflare Pages) can load cars from this backend.
+
+3. **Add your domain on Render**  
+   In the **NightDrive** service: go to **Settings** (tab in the header). Scroll to **Custom Domains**. Click **Add Custom Domain** and enter **`nightdrive.store`** (and **`www.nightdrive.store`** if you use www). Render will show you what to set in DNS (usually a CNAME).
+
+4. **Point your domain at Render (Cloudflare)**  
+   In **Cloudflare** → your **nightdrive.store** zone → **DNS** → **Records**:
+   - **Type:** CNAME  
+   - **Name:** `@` (for nightdrive.store) or `www` (for www)  
+   - **Target:** the hostname Render gave you (e.g. `nightdrive-xxxx.onrender.com`)  
+   - **Proxy:** Proxied (orange cloud) is fine.  
+   Save. After DNS propagates, Render will serve your app on **https://nightdrive.store**.
+
+5. **Env vars and CORS**  
+   In the NightDrive service: **Environment** (tab or left sidebar). Add `MARKETCHECK_API_KEY`, `ALLOWED_ORIGINS` = `https://nightdrive.store,https://nightdrive-795.pages.dev`, and the rest from the table below. Then **Manual Deploy** → **Deploy latest commit** so the app restarts with the new vars.
+
+**Summary:** Click NightDrive → copy URL → Settings → Custom Domains → add nightdrive.store → in Cloudflare DNS point the domain to that Render hostname → set env vars → redeploy.
+
+---
+
 ## Usual production deploy: Cloudflare Pages
 
 Deploy the **frontend** (static `public/` folder) to Cloudflare Pages:
