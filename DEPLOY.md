@@ -38,7 +38,8 @@ You’re on the **Architecture** view and **NightDrive** is Online. Do this next
    In the **NightDrive** service: go to **Settings** (tab in the header). Scroll to **Custom Domains**. Click **Add Custom Domain** and enter **`nightdrive.store`** (and **`www.nightdrive.store`** if you use www). Render will show you what to set in DNS (usually a CNAME).
 
 4. **Point your domain at Render (Cloudflare)**  
-   In **Cloudflare** → your **nightdrive.store** zone → **DNS** → **Records**:
+   Open https://dash.cloudflare.com → your **nightdrive.store** zone → **DNS** → **Records**.  
+   (Step-by-step for Cloudflare: https://docs.render.com/configure-cloudflare-dns)
    - **Type:** CNAME  
    - **Name:** `@` (for nightdrive.store) or `www` (for www)  
    - **Target:** the hostname Render gave you (e.g. `nightdrive-xxxx.onrender.com`)  
@@ -49,6 +50,13 @@ You’re on the **Architecture** view and **NightDrive** is Online. Do this next
    In the NightDrive service: **Environment** (tab or left sidebar). Add `MARKETCHECK_API_KEY`, `ALLOWED_ORIGINS` = `https://nightdrive.store,https://nightdrive-795.pages.dev`, and the rest from the table below. Then **Manual Deploy** → **Deploy latest commit** so the app restarts with the new vars.
 
 **Summary:** Click NightDrive → copy URL → Settings → Custom Domains → add nightdrive.store → in Cloudflare DNS point the domain to that Render hostname → set env vars → redeploy.
+
+**Working links (use these):**
+- Render custom domains: https://render.com/docs/custom-domains
+- Render + Cloudflare DNS: https://docs.render.com/configure-cloudflare-dns
+- Cloudflare dashboard (DNS): https://dash.cloudflare.com — then select nightdrive.store → DNS → Records
+
+**Why the domain is in two places:** You add it on Render (so Render serves your app and issues HTTPS for nightdrive.store) and in Cloudflare DNS (so the internet sends nightdrive.store traffic to Render). Both steps are required.
 
 ---
 
