@@ -4,6 +4,18 @@ The site is configured for **nightdrive.store** (canonicals, sitemap, robots).
 
 ---
 
+## Cars not loading on Cloudflare Pages?
+
+The frontend (Pages) must call your **Node backend** (Render or Railway). In **`public/config.js`** set:
+
+```js
+window.ND_API_BASE = 'https://YOUR-BACKEND-URL';  // no trailing slash
+```
+
+Use the exact URL Render or Railway gives you (e.g. `https://nightdrive.onrender.com` or `https://xxx.up.railway.app`). Then run `npm run deploy:web` again and ensure your backend has `ALLOWED_ORIGINS` including `https://nightdrive.store` and `https://nightdrive-795.pages.dev`.
+
+---
+
 ## Usual production deploy: Cloudflare Pages
 
 Deploy the **frontend** (static `public/` folder) to Cloudflare Pages:
