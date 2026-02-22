@@ -378,9 +378,15 @@ function showSkeletons(container, count) {
   if (el) el.innerHTML = Array(count).fill(skeletonCard()).join('');
 }
 
+/* ── API base: set in config.js when frontend is on Pages and API is elsewhere ── */
+function apiBase() {
+  return (typeof window !== 'undefined' && window.ND_API_BASE) ? String(window.ND_API_BASE).replace(/\/$/, '') : '';
+}
+
 /* ── Fetch wrapper ── */
 async function apiFetch(endpoint) {
-  const res = await fetch(endpoint);
+  const url = apiBase() + endpoint;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -1116,7 +1122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bubble = addAssistantBubble(chatOut, 'Thinking…');
     bubble.classList.add('thinking');
     try {
-      const res = await fetch('/api/chat/stream', {
+      const res = await fetch(apiBase() + '/api/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
@@ -1219,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true;
     btn.textContent = 'Sending...';
     try {
-      const res = await fetch('/api/newsletter', {
+      const res = await fetch(apiBase() + '/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1260,7 +1266,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch(apiBase() + '/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

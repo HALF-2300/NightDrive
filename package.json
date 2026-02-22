@@ -9,6 +9,7 @@
     "gen:cars-corpus": "node scripts/gen-cars-corpus.js",
     "gen:og-images": "node scripts/download-og-placeholders.js",
     "backup-leads": "node scripts/backup-leads.js",
+    "deploy:web": "npx wrangler pages deploy public --project-name=nightdrive",
     "pm2:start": "pm2 start ecosystem.config.js --env production",
     "pm2:stop": "pm2 stop autoelite",
     "pm2:restart": "pm2 restart autoelite",

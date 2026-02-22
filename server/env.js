@@ -52,6 +52,7 @@ module.exports = {
     return process.env.NODE_ENV || 'development';
   },
   get PORT() {
+    /* Render and similar hosts inject PORT (e.g. 10000); never override it in the dashboard. */
     return parseInt(process.env.PORT || '1335', 10);
   },
   get MARKETCHECK_API_KEY() {

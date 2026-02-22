@@ -1,6 +1,25 @@
 # Deploy NightDrive / AutoElite
 
-Your app is a **Node.js server** (not static). The site is configured for **nightdrive.store** (canonicals, sitemap, robots).
+The site is configured for **nightdrive.store** (canonicals, sitemap, robots).
+
+---
+
+## Usual production deploy: Cloudflare Pages
+
+Deploy the **frontend** (static `public/` folder) to Cloudflare Pages:
+
+```bash
+npm run deploy:web
+```
+
+This runs **`wrangler pages deploy public --project-name=nightdrive`**. You must be logged in to Wrangler (`npx wrangler login`) or have `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` set.
+
+**For real cars and full layout on Cloudflare Pages:** The Node API must run elsewhere (e.g. Railway). Then:
+1. Deploy the Node app to **Railway** (or Render), set env vars and **ALLOWED_ORIGINS** = `https://nightdrive-795.pages.dev` and `https://nightdrive.store`.
+2. In **`public/config.js`** set `window.ND_API_BASE = 'https://YOUR-RAILWAY-URL.up.railway.app';` (no trailing slash).
+3. Run **`npm run deploy:web`** again so Pages serves the updated frontend. The site will then load real data, all rails, and contact/newsletter will work.
+
+See **DEPLOY-FROM-AGENT.md** for why agent deploy can fail and how to enable it with tokens.
 
 ---
 
@@ -68,13 +87,33 @@ In Cloudflare **Rules** → **Page Rules** (or **Redirect Rules**): redirect `ht
 
 ## Option B: Render
 
+### Required flow (Render) — port must come from Render
+
+1. **Local (do not deploy before GitHub)**  
+   - This app is **Node** (`server.js`), not Next.js.  
+   - `package.json` has `"start": "node server.js"`. **Do not change** to `next start` — there is no Next.js app.  
+   - The server already binds to `process.env.PORT` (see `server/env.js`). No code change needed for port.
+
+2. **Commit and push** to GitHub (`main`/`master`).
+
+3. **In Render**  
+   - Service is connected to your GitHub repo and branch.  
+   - **Start command:** `npm start` (default). Do **not** override with a custom port (e.g. no `next start -p 6036`).  
+   - **Do not** set `PORT` in Environment — Render injects it (e.g. 10000).  
+   - Trigger deploy (or let auto-deploy run after push).
+
+**Goal:** Render detects the open port (usually 10000) and deployment turns green.
+
+---
+
 1. Go to **[render.com](https://render.com)** and sign in with **GitHub**.
 2. **New** → **Web Service**.
 3. Connect **HALF-2300/autoelite**.
 4. **Build command:** `npm install`  
-   **Start command:** `npm start`  
+   **Start command:** `npm start` (do not override; the app binds to `PORT` from the environment)  
    **Instance type:** Free (or paid for persistent disk).
-5. **Environment** → Add: `NODE_ENV`, `MARKETCHECK_API_KEY`, `ADMIN_TOKEN`, `ALLOWED_ORIGINS` (use the Render URL they give you, e.g. `https://autoelite.onrender.com`).
+5. **Environment** → Add: `NODE_ENV`, `MARKETCHECK_API_KEY`, `ADMIN_TOKEN`, `ALLOWED_ORIGINS` (use the Render URL they give you, e.g. `https://autoelite.onrender.com`).  
+   **Do not set `PORT`** — Render injects it automatically (e.g. 10000). The app uses `process.env.PORT`.
 6. Click **Create Web Service**.
 
 ---
