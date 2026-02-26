@@ -695,7 +695,7 @@ function setupHeroSearch() {
 /* ========================================================
    PAGE: INVENTORY — Single PAGE_SIZE for initial + loadMore
    ======================================================== */
-const PAGE_SIZE = 12;  // single source of truth: first render and every load more
+const PAGE_SIZE = 24;  // how many cars per page (inventory)
 let invPage = 0;
 
 async function loadInventory(page, opts) {
