@@ -6,6 +6,7 @@
   <meta name="description" content="NightDrive — Tonight's best machines. Trusted dealer marketplace. Market-verified pricing, secure transactions.">
   <meta name="theme-color" content="#050608">
   <title>NightDrive — Find the Machine Built For You</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
   <link rel="canonical" href="https://nightdrive.store/">
   <meta property="og:title" content="NightDrive — Find the Machine Built For You">
   <meta property="og:description" content="Tonight's best machines. Verified dealers. Market price analysis. No hidden fees.">
@@ -48,8 +49,8 @@
   <nav class="navbar" id="navbar">
     <div class="container nav-inner">
       <a href="/" class="logo">
-        <i class="fas fa-moon"></i>
-        <span>Night<strong>Drive</strong></span>
+        <span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" rx="6" fill="url(#ndg)"/><text x="16" y="22" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-weight="800" font-size="14">ND</text><defs><linearGradient id="ndg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop stop-color="#FF2D2D"/><stop offset="1" stop-color="#B91C1C"/></linearGradient></defs></svg></span>
+        <span class="logo-text"><span class="n">N</span>ight<span class="d">D</span>rive</span>
       </a>
       <ul class="nav-links" id="navLinks">
         <li><a href="/" class="active">Home</a></li>
@@ -69,17 +70,51 @@
   </nav>
 
   <!-- HERO -->
-  <section class="hero">
+  <section class="hero hero-normal">
     <div class="hero-bg hero-bg-image"></div>
-    <div class="hero-smoke"></div>
-    <div class="hero-glow"></div>
     <div class="container hero-inner">
-      <p class="hero-tag"><i class="fas fa-circle"></i> Tonight's best machines are waiting</p>
-      <h1 class="h1 hero-title">NOT EVERYONE<br><span class="accent">DESERVES THIS CAR.</span></h1>
-      <p class="hero-subtitle">Find the machine built for you. Trusted dealers. Market-verified pricing.</p>
+      <h1 class="h1 hero-title">Find Your Next Car</h1>
+      <p class="hero-subtitle">Trusted dealers. Market-verified pricing. Browse new and pre-owned vehicles.</p>
       <div class="hero-cta">
         <a href="/inventory" class="btn btn-primary btn-lg"><i class="fas fa-car"></i> Explore Cars</a>
         <a href="/contact" class="btn btn-secondary btn-lg">Sell Your Car</a>
+      </div>
+
+      <!-- 3 BIG CARS — always visible (no JS) -->
+      <div class="big-cars-grid big-cars-in-hero" id="bigCarsGrid">
+        <a href="/inventory" class="big-car-card">
+          <div class="big-car-img" style="background:#1a1f2e;">
+            <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=380&fit=crop&q=80" alt="BMW M4" width="600" height="380" loading="eager" style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>
+          <div class="big-car-body">
+            <div class="big-car-price">$82,900</div>
+            <h3 class="big-car-title">2026 BMW M4 Competition</h3>
+            <p class="big-car-meta">New · Coupe</p>
+            <span class="btn btn-primary btn-sm" style="margin-top:0.75rem;">View</span>
+          </div>
+        </a>
+        <a href="/inventory" class="big-car-card">
+          <div class="big-car-img" style="background:#1a1f2e;">
+            <img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&h=380&fit=crop&q=80" alt="Mercedes S-Class" width="600" height="380" loading="eager" style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>
+          <div class="big-car-body">
+            <div class="big-car-price">$118,300</div>
+            <h3 class="big-car-title">2026 Mercedes-Benz S-Class</h3>
+            <p class="big-car-meta">New · Sedan</p>
+            <span class="btn btn-primary btn-sm" style="margin-top:0.75rem;">View</span>
+          </div>
+        </a>
+        <a href="/inventory" class="big-car-card">
+          <div class="big-car-img" style="background:#1a1f2e;">
+            <img src="https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=600&h=380&fit=crop&q=80" alt="Tesla Model S" width="600" height="380" loading="eager" style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>
+          <div class="big-car-body">
+            <div class="big-car-price">$89,990</div>
+            <h3 class="big-car-title">2025 Tesla Model S Plaid</h3>
+            <p class="big-car-meta">Electric · Sedan</p>
+            <span class="btn btn-primary btn-sm" style="margin-top:0.75rem;">View</span>
+          </div>
+        </a>
       </div>
 
       <!-- Search Module -->
@@ -383,7 +418,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-about">
-          <a href="/" class="footer-logo"><i class="fas fa-moon"></i> <span>Night<strong>Drive</strong></span></a>
+          <a href="/" class="footer-logo"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" rx="6" fill="url(#ndg2)"/><text x="16" y="22" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-weight="800" font-size="14">ND</text><defs><linearGradient id="ndg2" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop stop-color="#FF2D2D"/><stop offset="1" stop-color="#B91C1C"/></linearGradient></defs></svg></span><span class="logo-text"><span class="n">N</span>ight<span class="d">D</span>rive</span></a>
           <p>Trusted dealer marketplace. Market-verified pricing. Secure transactions.</p>
           <div class="footer-socials">
             <a href="https://github.com/HALF-2300" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>

@@ -1,3 +1,7 @@
+console.log('[ND] app.js LOADED:', location.href);
+window.__ND_APP_LOADED = true;
+document.documentElement.setAttribute('data-nd-app', 'loaded');
+
 /* ========================================
    AutoElite — Dark Predator Engine Sound
    ======================================== */
@@ -248,9 +252,9 @@ function listingCard(l) {
     ? `<div class="card-variant-tag"><i class="fas ${variant.icon}"></i> ${variant.label}</div>`
     : '';
 
-  /* Image */
+  /* Image — use eager so Edge/Windows doesn't replace with blank placeholders */
   const imgHTML = photo
-    ? `<img src="${photo}" alt="${title}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=card-placeholder><i class=fas\\ fa-car></i></div>'">`
+    ? `<img src="${photo}" alt="${title}" loading="eager" onerror="this.parentElement.innerHTML='<div class=card-placeholder><i class=fas\\ fa-car></i></div>'">`
     : `<div class="card-placeholder"><i class="fas fa-car"></i></div>`;
 
   /* Location */
@@ -320,7 +324,7 @@ function listingCard(l) {
     huntBadgesHTML = '<div class="card-hunt-badges">' + badges.join('') + '</div>';
   }
 
-  return `<article class="car-card${variantCls}" data-id="${l.id || l.vin}">
+  return `<article class="car-card${variantCls}" data-id="${l.id || l.vin}" data-car-card="1">
     <div class="car-card-img">
       ${opts.hunted ? huntBadgesHTML : ''}
       <div class="card-badges">
@@ -357,6 +361,15 @@ function listingCard(l) {
   </article>`;
 }
 
+function safeCard(v, opts) {
+  try {
+    return listingCard(v, opts);
+  } catch (e) {
+    console.warn('[ND] listingCard failed -> using miniCard', e);
+    return miniCard(v);
+  }
+}
+
 /* ── Skeleton V2 — matches card V2 geometry exactly ── */
 function skeletonCard() {
   return `<article class="car-card skeleton-card" aria-hidden="true">
@@ -383,12 +396,167 @@ function apiBase() {
   return (typeof window !== 'undefined' && window.ND_API_BASE) ? String(window.ND_API_BASE).replace(/\/$/, '') : '';
 }
 
-/* ── Fetch wrapper ── */
-async function apiFetch(endpoint) {
-  const url = apiBase() + endpoint;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+/* ── Fetch wrapper: throw on non-OK, safe JSON parse, log source ── */
+async function apiFetch(path) {
+  let base = (window.ND_API_BASE != null) ? String(window.ND_API_BASE).replace(/\/$/, '') : '';
+  let url = base + path;
+
+  let res = await fetch(url, { headers: { Accept: 'application/json' } }).catch(function () { return null; });
+
+  /* If cross-origin request failed (e.g. Render down, CORS), retry same-origin so local server works */
+  if ((!res || res.type === 'error') && base) {
+    console.warn('[ND] apiFetch failed for', url, '-> retrying same-origin', path);
+    url = path;
+    try {
+      res = await fetch(url, { headers: { Accept: 'application/json' } });
+    } catch (e2) {
+      throw new Error('apiFetch network error for ' + path + ' (same-origin retry failed)');
+    }
+  }
+
+  if (!res) throw new Error('apiFetch network error for ' + path);
+
+  let data;
+  try {
+    data = await res.json();
+  } catch (e) {
+    throw new Error('apiFetch JSON parse failed for ' + url + ' (status ' + res.status + ')');
+  }
+
+  if (!res.ok) {
+    const msg = (data && (data.error || data.message)) ? (data.error || data.message) : 'HTTP ' + res.status;
+    throw new Error('apiFetch ' + path + ' failed: ' + msg);
+  }
+
+  const src = res.headers.get('X-ND-Source');
+  if (src) console.log('[ND]', path, 'source=', src);
+
+  return data;
+}
+
+/* ── Never blank grid: if 0 cards rendered, run demo render ── */
+function ensureNonEmpty(container, renderDemoFn) {
+  if (!container) return;
+  const cards = container.querySelectorAll('[data-car-card], .car-card');
+  if (cards.length === 0) {
+    console.warn('[ND] rendered 0 cards -> forcing demo');
+    renderDemoFn();
+  }
+}
+
+function isInventoryPage() {
+  const p = (location.pathname || '').toLowerCase();
+  return p.includes('inventory');
+}
+
+function panicDemo(reason) {
+  console.warn('[ND] PANIC DEMO ->', reason);
+  try {
+    if (isInventoryPage()) renderDemoInventory();
+    else renderDemoHome();
+  } catch (e) {
+    console.error('[ND] PANIC DEMO failed:', e);
+    hardInject6Cards();
+  }
+}
+
+window.addEventListener('error', (e) => {
+  // Only panic if the grid has no cards — don't wipe real content for unrelated errors
+  const hasCards = document.querySelectorAll('[data-car-card]').length > 0;
+  if (!hasCards) panicDemo('window.error: ' + (e?.message || 'unknown'));
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  const msg = e?.reason?.message || String(e?.reason || 'unknown');
+  const hasCards = document.querySelectorAll('[data-car-card]').length > 0;
+  if (!hasCards) panicDemo('unhandledrejection: ' + msg);
+});
+
+function miniCard(v) {
+  const title = (v && (v.heading || v.title)) ? String(v.heading || v.title) : 'Vehicle';
+  const price = (v && (v.price != null)) ? `$${Number(v.price).toLocaleString()}` : '—';
+  const img =
+    (v && v.media && Array.isArray(v.media.photo_links) && v.media.photo_links[0]) ? v.media.photo_links[0] :
+    (v && v.photo) ? v.photo :
+    'https://picsum.photos/640/420';
+
+  return `
+    <div class="car-card" data-car-card="1" style="border:1px solid rgba(255,255,255,.12); border-radius:14px; overflow:hidden;">
+      <div style="aspect-ratio: 16/10; background:#111;">
+        <img src="${img}" alt="${title}" loading="eager" style="width:100%; height:100%; object-fit:cover; display:block;">
+      </div>
+      <div style="padding:12px;">
+        <div style="font-weight:700; line-height:1.2;">${title}</div>
+        <div style="opacity:.85; margin-top:6px;">${price}</div>
+      </div>
+    </div>
+  `;
+}
+
+function hardInject6Cards() {
+  const grid =
+    document.querySelector('#inventoryCars') ||
+    document.querySelector('[data-inventory-grid]') ||
+    document.querySelector('[data-rail="editorPicks"]') ||
+    document.querySelector('#curatedFeed') ||
+    document.querySelector('#huntedGrid');
+
+  if (!grid) {
+    const wrap = document.createElement('div');
+    wrap.id = 'nd-hard-fallback';
+    wrap.style.display = 'grid';
+    wrap.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
+    wrap.style.gap = '12px';
+    wrap.style.padding = '12px';
+    document.body.prepend(wrap);
+  }
+
+  const target = grid || document.querySelector('#nd-hard-fallback') || document.body;
+
+  const list = (window.demoVehicles && window.demoVehicles.length)
+    ? window.demoVehicles.slice(0, 6)
+    : new Array(6).fill(0).map((_, i) => ({ heading: `Demo Vehicle ${i+1}`, price: 20000 + i * 1500 }));
+
+  target.style.display = 'grid';
+  target.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
+  target.style.gap = '12px';
+
+  target.innerHTML = list.map(miniCard).join('');
+}
+
+function renderDemoInventory() {
+  let grid = document.getElementById('inventoryCars') || document.querySelector('[data-inventory-grid]');
+  if (!grid) {
+    const wrap = document.createElement('div');
+    wrap.id = 'inventoryCars';
+    wrap.className = 'cars-grid';
+    const main = document.querySelector('main');
+    if (main) main.appendChild(wrap);
+    else document.body.appendChild(wrap);
+    grid = wrap;
+  }
+  grid.innerHTML = demoVehicles.map(v => safeCard(v)).join('');
+  const countEl = document.querySelector('.results-count');
+  if (countEl) countEl.innerHTML = 'Showing <strong>1–' + demoVehicles.length + '</strong> of <strong>' + demoVehicles.length + '</strong>';
+}
+
+function renderDemoHome() {
+  const feedContainer = document.getElementById('curatedFeed');
+  if (!feedContainer) return;
+  const rail = feedContainer.querySelector('[data-rail="editorPicks"]');
+  /* Never use document.body — inject only into #curatedFeed so we don't wipe the page */
+  const target = rail || feedContainer;
+  const html = (window.demoVehicles && window.demoVehicles.length ? window.demoVehicles : demoVehicles).slice(0, HOME_RAIL_SIZE).map(v => safeCard(v)).join('');
+  if (rail) {
+    rail.innerHTML = html;
+    var railWrap = rail.closest('.car-rail');
+    if (railWrap) railWrap.style.display = '';
+  } else {
+    var fallbackGrid = feedContainer.querySelector('.cars-grid, [data-rail]');
+    if (fallbackGrid) fallbackGrid.innerHTML = html; else feedContainer.insertAdjacentHTML('beforeend', '<div class="cars-grid rail-grid" data-rail="editorPicks">' + html + '</div>');
+  }
+  var huntedGrid = document.getElementById('huntedGrid');
+  if (huntedGrid) huntedGrid.innerHTML = (window.demoVehicles && window.demoVehicles.length ? window.demoVehicles : demoVehicles).slice(0, HOME_RAIL_SIZE).map(l => safeCard(l, { hunted: true })).join('');
 }
 
 /* ========================================================
@@ -402,6 +570,7 @@ const demoVehicles = [
   { id:'demo-5', heading:'2026 Toyota RAV4 Hybrid', price:35400, miles:50, inventory_type:'new', build:{year:2026,make:'Toyota',model:'RAV4',fuel_type:'Hybrid',transmission:'Automatic',body_type:'SUV'}, media:{photo_links:['https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=640&h=400&fit=crop&auto=format&q=80']}, dealer:{city:'Chicago',state:'IL',dealer_type:'franchise'}, _meta:{score:0.78,variant:'best-value',dealBadge:'great-deal',trustSignals:['verified-vin','franchise-dealer'],priceFairness:0.9,freshness:0.6,mileageValue:0.95,daysSinceFirst:8,medianPrice:39500} },
   { id:'demo-6', heading:'2025 Ford Mustang GT', price:42300, miles:8500, inventory_type:'used', build:{year:2025,make:'Ford',model:'Mustang',fuel_type:'Gasoline',transmission:'Manual',body_type:'Coupe'}, media:{photo_links:['https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=640&h=400&fit=crop&auto=format&q=80']}, dealer:{city:'Dallas',state:'TX',dealer_type:'independent'}, _meta:{score:0.65,variant:'low-mileage',dealBadge:'fair-price',trustSignals:['verified-vin'],priceFairness:0.5,freshness:0.4,mileageValue:0.8,daysSinceFirst:20,medianPrice:45000} },
 ];
+window.demoVehicles = demoVehicles;
 
 /* ========================================================
    PAGE: HOME — Curated Rail System (one rail size constant)
@@ -410,7 +579,11 @@ const HOME_RAIL_SIZE = 6;  // per-rail count from API; hunted section uses same
 
 async function loadHomeFeed() {
   const feedContainer = document.getElementById('curatedFeed');
-  if (!feedContainer) return;
+  if (!feedContainer) {
+    console.warn('[ND] home feed container missing -> demo');
+    renderDemoHome();
+    return;
+  }
 
   const railGrids = feedContainer.querySelectorAll('.rail-grid');
   railGrids.forEach(g => showSkeletons(g, HOME_RAIL_SIZE));
@@ -418,6 +591,12 @@ async function loadHomeFeed() {
   try {
     const data = await apiFetch('/api/home-feed');
     const rails = data.rails || {};
+    const hasAnyRail = ['editorPicks', 'bestDeals', 'lowMileage', 'justArrived']
+      .some(k => Array.isArray(rails[k]) && rails[k].length > 0);
+    if (!hasAnyRail) {
+      renderDemoHome();
+      return;
+    }
 
     const railMap = {
       editorPicks: feedContainer.querySelector('[data-rail="editorPicks"]'),
@@ -433,12 +612,17 @@ async function loadHomeFeed() {
 
     for (const [key, grid] of Object.entries(railMap)) {
       if (!grid) continue;
-      const items = rails[key] || [];
-      if (items.length > 0) {
-        grid.innerHTML = items.map(listingCard).join('');
-        grid.closest('.car-rail').style.display = '';
-      } else {
-        grid.closest('.car-rail').style.display = 'none';
+      try {
+        const items = rails[key] || [];
+        const railWrap = grid.closest('.car-rail');
+        if (items.length > 0) {
+          grid.innerHTML = items.map(safeCard).join('');
+          if (railWrap) railWrap.style.display = '';
+        } else {
+          if (railWrap) railWrap.style.display = 'none';
+        }
+      } catch (e) {
+        console.error('[ND] Rail render failed:', key, e);
       }
     }
 
@@ -453,17 +637,38 @@ async function loadHomeFeed() {
         seen.add(id);
         return true;
       });
-      huntedGrid.innerHTML = unique.slice(0, HOME_RAIL_SIZE).map(l => listingCard(l, { hunted: true })).join('');
+      huntedGrid.innerHTML = unique.slice(0, HOME_RAIL_SIZE).map(l => safeCard(l, { hunted: true })).join('');
+    }
+
+    var firstRailGrid = feedContainer.querySelector('[data-rail="editorPicks"]');
+    if (firstRailGrid) ensureNonEmpty(firstRailGrid, renderDemoHome);
+    /* Force first rail visible when we have content */
+    var firstRail = feedContainer.querySelector('.car-rail');
+    if (firstRail) firstRail.style.removeProperty('display');
+
+    /* Scroll first cars section into view (helps Edge/Windows where hero is empty) */
+    var firstCars = document.getElementById('huntedSection') || feedContainer.querySelector('.car-rail');
+    if (firstCars && firstCars.querySelector('.car-card')) {
+      firstCars.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
   } catch (err) {
-    console.warn('Home feed unavailable, using demo data:', err.message);
-    const grid = feedContainer.querySelector('[data-rail="editorPicks"]');
-    if (grid) grid.innerHTML = demoVehicles.slice(0, HOME_RAIL_SIZE).map(listingCard).join('');
-    feedContainer.querySelectorAll('.car-rail:not(:first-child)').forEach(r => r.style.display = 'none');
-    const huntedGrid = document.getElementById('huntedGrid');
-    if (huntedGrid) huntedGrid.innerHTML = demoVehicles.slice(0, HOME_RAIL_SIZE).map(l => listingCard(l, { hunted: true })).join('');
+    console.error('[ND] loadHomeFeed failed:', err);
+    renderDemoHome();
   }
+
+  /* Delayed safety: if still no cards after 2s, force demo so user always sees cars */
+  setTimeout(function () {
+    var feed = document.getElementById('curatedFeed');
+    if (!feed) return;
+    var cards = feed.querySelectorAll('.car-card:not(.skeleton-card)');
+    if (cards.length === 0) {
+      console.warn('[ND] No cards after load -> forcing demo');
+      renderDemoHome();
+      var h = document.getElementById('huntedGrid');
+      if (h && h.querySelectorAll('.car-card').length === 0) h.innerHTML = (window.demoVehicles || demoVehicles).slice(0, HOME_RAIL_SIZE).map(function (l) { return safeCard(l, { hunted: true }); }).join('');
+    }
+  }, 2000);
 }
 
 /* ── Hero search ── */
@@ -495,8 +700,12 @@ let invPage = 0;
 
 async function loadInventory(page, opts) {
   const replace = opts && opts.replace;
-  const grid = document.getElementById('inventoryCars');
-  if (!grid) return;
+  const grid = document.getElementById('inventoryCars') || document.querySelector('[data-inventory-grid]');
+  if (!grid) {
+    console.warn('[ND] inventory grid container missing -> demo');
+    renderDemoInventory();
+    return;
+  }
 
   if (replace) invPage = 0;
   else if (typeof page === 'number') invPage = page;
@@ -597,7 +806,15 @@ async function loadInventory(page, opts) {
     const listings = data.listings || [];
     const total = data.num_found || 0;
 
-    grid.innerHTML = listings.map(listingCard).join('');
+    if (listings.length === 0) {
+      renderDemoInventory();
+      updateActiveFilterChips();
+      buildPagination(demoVehicles.length);
+      return;
+    }
+
+    grid.innerHTML = listings.map(safeCard).join('');
+    ensureNonEmpty(grid, renderDemoInventory);
 
     const countEl = document.querySelector('.results-count');
     if (countEl) {
@@ -610,8 +827,8 @@ async function loadInventory(page, opts) {
     buildPagination(total);
 
   } catch (err) {
-    console.warn('Inventory fetch failed:', err.message);
-    grid.innerHTML = demoVehicles.map(listingCard).join('');
+    console.error('[ND] loadInventory failed:', err);
+    renderDemoInventory();
   }
 }
 
@@ -932,7 +1149,7 @@ async function loadCarDetails() {
         const similar = await apiFetch(`/api/inventory?make=${encodeURIComponent(build.make)}&rows=3&year_range=2023-2026`);
         const simGrid = document.getElementById('similarCars');
         if (simGrid && similar.listings) {
-          simGrid.innerHTML = similar.listings.filter(s => s.id !== listingId && s.vin !== listingId).slice(0, 3).map(listingCard).join('');
+          simGrid.innerHTML = similar.listings.filter(s => s.id !== listingId && s.vin !== listingId).slice(0, 3).map(safeCard).join('');
         }
       } catch {}
     }
@@ -947,6 +1164,12 @@ async function loadCarDetails() {
    ======================================================== */
 document.addEventListener('DOMContentLoaded', () => {
 
+  /* Warn if not on same origin as API (common reason for "no cars") */
+  const port = (location.port && location.port !== '80' && location.port !== '443') ? location.port : (location.protocol === 'https:' ? '443' : '80');
+  if (location.protocol === 'file:' || (location.hostname === 'localhost' && port !== '2022') || (location.hostname === '127.0.0.1' && port !== '2022')) {
+    console.warn('[ND] Wrong URL? Cars load from API at port 2022. Open http://localhost:2022 — current:', location.href);
+  }
+
   const isHome      = !!document.getElementById('curatedFeed');
   const isInventory = !!document.getElementById('inventoryCars');
   const isDetail    = !!document.querySelector('.detail-layout');
@@ -958,6 +1181,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (isInventory) {
     loadInventory(0, { replace: true });
     setupInventoryFilters();
+    setTimeout(function () {
+      var grid = document.getElementById('inventoryCars') || document.querySelector('[data-inventory-grid]');
+      if (grid && grid.querySelectorAll('.car-card:not(.skeleton-card)').length === 0) {
+        console.warn('[ND] Inventory still empty after load -> forcing demo');
+        if (typeof renderDemoInventory === 'function') renderDemoInventory(); else if (typeof hardInject6Cards === 'function') hardInject6Cards();
+      }
+    }, 2500);
   }
   if (isDetail) {
     loadCarDetails();
@@ -1214,6 +1444,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (newsletterFormTime && !newsletterFormTime.value) newsletterFormTime.value = Date.now();
   const contactFormTime = document.getElementById('contactFormTime');
   if (contactFormTime && !contactFormTime.value) contactFormTime.value = Date.now();
+  const accountFormTime = document.getElementById('accountFormTime');
+  if (accountFormTime && !accountFormTime.value) accountFormTime.value = Date.now();
 
   document.getElementById('newsletterForm')?.addEventListener('submit', async e => {
     e.preventDefault();
@@ -1289,6 +1521,45 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch {
       btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> Network error';
       setTimeout(() => { btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; btn.disabled = false; }, 3000);
+    }
+  });
+
+  document.getElementById('accountRequestForm')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const form = e.target;
+    const nameEl = form.querySelector('input[name="name"]');
+    const emailEl = form.querySelector('input[name="email"]');
+    const btn = form.querySelector('button[type="submit"]');
+    const t0El = form.querySelector('input[name="_t0"]');
+    if (!emailEl || !btn) return;
+
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch(apiBase() + '/api/account-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: nameEl ? nameEl.value : undefined,
+          email: emailEl.value,
+          _t0: t0El ? parseInt(t0El.value, 10) : Date.now(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (nameEl) nameEl.value = '';
+        emailEl.value = '';
+        btn.textContent = 'Request received!';
+        setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 4000);
+      } else {
+        btn.textContent = data.error || 'Error';
+        setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 3000);
+      }
+    } catch {
+      btn.textContent = 'Network error';
+      setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 3000);
     }
   });
 

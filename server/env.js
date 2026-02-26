@@ -58,6 +58,9 @@ module.exports = {
   get MARKETCHECK_API_KEY() {
     return (process.env.MARKETCHECK_API_KEY || '').trim();
   },
+  get AUTO_DEV_API_KEY() {
+    return (process.env.AUTO_DEV_API_KEY || '').trim();
+  },
   get ADMIN_TOKEN() {
     return isProd ? (process.env.ADMIN_TOKEN || '').trim() : (process.env.ADMIN_TOKEN || null);
   },
@@ -94,5 +97,11 @@ module.exports = {
   },
   get LEAD_WEBHOOK_SECRET() {
     return (process.env.LEAD_WEBHOOK_SECRET || '').trim();
+  },
+  get RESEND_API_KEY() {
+    return (process.env.RESEND_API_KEY || '').trim();
+  },
+  get NOTIFICATION_FROM_EMAIL() {
+    return (process.env.NOTIFICATION_FROM_EMAIL || '').trim();
   },
 };

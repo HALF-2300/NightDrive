@@ -23,6 +23,7 @@ if (!EBAY_CLIENT_ID && !EBAY_CLIENT_SECRET) {
   console.warn('[WARN] eBay: set both EBAY_CLIENT_ID and EBAY_CLIENT_SECRET for API access');
 }
 const INTERNAL_CORPUS_KEY = config.INTERNAL_CORPUS_KEY;
+const AUTO_DEV_API_KEY = config.AUTO_DEV_API_KEY;
 
 const { handleCors } = require('./server/middleware/cors');
 const { checkAdmin: adminAuth } = require('./server/middleware/admin-auth');
@@ -77,6 +78,7 @@ const RATE_LIMITS = {
   api:        { windowMs: 60000, max: 60 },
   contact:    { windowMs: 3600000, max: 10 },
   newsletter: { windowMs: 3600000, max: 5 },
+  account:    { windowMs: 3600000, max: 5 },
   admin:      { windowMs: 60000, max: 30 },
 };
 
@@ -167,6 +169,19 @@ const _cache = {};
 const CACHE_TTL = 5 * 60 * 1000;
 const STALE_TTL = 30 * 60 * 1000;
 
+/* Last MarketCheck calls for /api/_diag (dev only) */
+let LAST_MC = { ts: null, calls: [] };
+function noteMc(endpoint, status, body) {
+  LAST_MC.ts = new Date().toISOString();
+  LAST_MC.calls.push({
+    ts: LAST_MC.ts,
+    endpoint,
+    status,
+    error: body && (body.error || body.message) ? (body.error || body.message) : null,
+  });
+  if (LAST_MC.calls.length > 25) LAST_MC.calls.shift();
+}
+
 function fromCache(key) {
   const c = _cache[key];
   if (!c) return { data: null, stale: false };
@@ -199,8 +214,16 @@ function mcFetch(endpoint, params, retries) {
       let data = '';
       apiRes.on('data', chunk => (data += chunk));
       apiRes.on('end', () => {
-        try { resolve({ status: apiRes.statusCode, body: JSON.parse(data) }); }
-        catch { resolve({ status: apiRes.statusCode, body: data }); }
+        let body;
+        try {
+          body = JSON.parse(data);
+          noteMc(endpoint, apiRes.statusCode, body);
+          resolve({ status: apiRes.statusCode, body });
+        } catch {
+          body = data;
+          noteMc(endpoint, apiRes.statusCode, typeof body === 'object' ? body : null);
+          resolve({ status: apiRes.statusCode, body });
+        }
       });
     });
     request.on('error', err => {
@@ -384,6 +407,93 @@ function ebayGetItem(itemId) {
 }
 
 /* =========================================================
+   AUTO.DEV — Vehicle Listings API (Bearer token, 1000 calls/month)
+   ========================================================= */
+function autoDevFetch(path, qs) {
+  if (!AUTO_DEV_API_KEY) return Promise.resolve(null);
+  const query = qs && Object.keys(qs).length ? '?' + new URLSearchParams(qs).toString() : '';
+  const url = 'https://api.auto.dev/listings' + (path || '') + query;
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.get({
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      headers: {
+        'Authorization': 'Bearer ' + AUTO_DEV_API_KEY,
+        'Accept': 'application/json',
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', (ch) => { data += ch; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          if (res.statusCode === 200) resolve(json);
+          else reject(new Error(json.error || json.message || 'HTTP ' + res.statusCode));
+        } catch (e) {
+          reject(new Error(data || 'auto.dev parse error'));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(12000, () => { req.destroy(); reject(new Error('auto.dev timeout')); });
+  }).catch(err => {
+    log('warn', 'auto.dev fetch failed', { err: err.message });
+    return null;
+  });
+}
+
+function normalizeAutoDevListing(item) {
+  const v = item.vehicle || {};
+  const r = item.retailListing || {};
+  const w = item.wholesaleListing || {};
+  const price = r.price != null ? Number(r.price) : null;
+  const miles = r.miles != null ? r.miles : w.miles != null ? w.miles : null;
+  const heading = [v.year, v.make, v.model].filter(Boolean).join(' ') || 'Vehicle';
+  const photo = r.primaryImage || null;
+  const id = item.vin || 'autodev-' + Math.random().toString(36).slice(2, 9);
+  return {
+    id,
+    vin: item.vin,
+    heading,
+    price,
+    miles,
+    inventory_type: r.cpo ? 'certified' : (r.used ? 'used' : 'new'),
+    build: {
+      year: v.year,
+      make: v.make,
+      model: v.model,
+      trim: v.trim,
+      fuel_type: v.fuel || v.engine,
+      transmission: v.transmission,
+      body_type: null,
+      drivetrain: v.drivetrain,
+      engine: v.engine,
+      doors: v.doors,
+    },
+    media: { photo_links: [photo] },
+    dealer: {
+      name: r.dealer,
+      city: r.city,
+      state: r.state,
+      zip: r.zip,
+      dealer_type: 'independent',
+    },
+    itemWebUrl: r.vdp,
+    _meta: {
+      score: 0.6,
+      variant: null,
+      dealBadge: price ? 'fair-price' : null,
+      priceFairness: 0.5,
+      freshness: 0.6,
+      mileageValue: miles != null ? 0.5 : 0.5,
+      trustSignals: item.vin ? ['verified-vin'] : [],
+    },
+    _source: 'autodev',
+  };
+}
+
+/* =========================================================
    PIPELINE
    ========================================================= */
 
@@ -535,11 +645,12 @@ function rankAndDiversify(listings, blockSize) {
     const modelKey = `${(b.make || '')}|${(b.model || '')}`.toLowerCase();
     const dealerId = String(l.dealer?.id || '');
 
+    /* At most 1 of same make|model per block so you don't see same model next to each other */
     const modelInBlock = block.filter(x => {
       const xb = x.build || {};
       return `${(xb.make || '')}|${(xb.model || '')}`.toLowerCase() === modelKey;
     }).length;
-    if (modelInBlock >= 2) continue;
+    if (modelInBlock >= 1) continue;
 
     globalDealerCount[dealerId] = (globalDealerCount[dealerId] || 0);
     if (globalDealerCount[dealerId] >= 3) continue;
@@ -550,7 +661,42 @@ function rankAndDiversify(listings, blockSize) {
 
     if (block.length >= blockSize) block = [];
   }
-  return result;
+  return interleaveByModel(result);
+}
+
+/** Reorder so no two adjacent listings have the same make|model. */
+function interleaveByModel(listings) {
+  if (listings.length <= 1) return listings;
+  const modelKey = (l) => {
+    const b = l.build || {};
+    return `${(b.make || '')}|${(b.model || '')}`.toLowerCase();
+  };
+  const byModel = new Map();
+  for (const l of listings) {
+    const k = modelKey(l);
+    if (!byModel.has(k)) byModel.set(k, []);
+    byModel.get(k).push(l);
+  }
+  const out = [];
+  let prevKey = null;
+  while (out.length < listings.length) {
+    let bestK = null;
+    let bestList = null;
+    for (const [k, arr] of byModel.entries()) {
+      if (arr.length === 0 || k === prevKey) continue;
+      if (!bestList || arr.length > bestList.length) {
+        bestK = k;
+        bestList = arr;
+      }
+    }
+    if (!bestK || !bestList || bestList.length === 0) break;
+    out.push(bestList.shift());
+    if (bestList.length === 0) byModel.delete(bestK);
+    prevKey = bestK;
+  }
+  /* Append any remaining (same model as last) so we don't drop listings */
+  for (const arr of byModel.values()) for (const l of arr) out.push(l);
+  return out;
 }
 
 function lightDiversify(listings, maxPerModel) {
@@ -566,12 +712,22 @@ function lightDiversify(listings, maxPerModel) {
 
 function processPipeline(listings, opts) {
   opts = opts || {};
-  let result = deduplicateListings(listings);
+
+  // Optionally drop cars with too few photos so cards always have a strong image.
+  const minPhotos = Number.isFinite(opts.minPhotos) ? opts.minPhotos : 0;
+  let base = Array.isArray(listings) ? listings : [];
+  if (minPhotos > 0 && base.length) {
+    const filtered = base.filter(l => (l.media?.photo_links?.length || 0) >= minPhotos);
+    if (filtered.length) base = filtered;
+  }
+
+  let result = deduplicateListings(base);
   result = computeMarketContext(result);
   if (opts.rank !== false) {
     result = rankAndDiversify(result, opts.blockSize || 8);
   } else {
     result = lightDiversify(result, opts.maxPerModel || 3);
+    result = interleaveByModel(result);
   }
   return result;
 }
@@ -602,12 +758,106 @@ function pickRail(pool, count, usedIds, scoreFn) {
   return result;
 }
 
+/* Demo fallback so UI never goes empty when upstream returns zero */
+function getDemoListings() {
+  return [
+    { id: 'demo-1', vin: 'DEMO1', heading: '2026 BMW M4 Competition', price: 82900, miles: 1250, inventory_type: 'new', build: { year: 2026, make: 'BMW', model: 'M4 Competition', fuel_type: 'Gasoline', transmission: 'Automatic', body_type: 'Coupe' }, media: { photo_links: ['https://images.unsplash.com/photo-1555215695-3004980ad54e?w=640&h=400&fit=crop&auto=format&q=80'] }, dealer: { city: 'New York', state: 'NY', dealer_type: 'franchise' } },
+    { id: 'demo-2', vin: 'DEMO2', heading: '2026 Mercedes-Benz S-Class', price: 118300, miles: 500, inventory_type: 'new', build: { year: 2026, make: 'Mercedes-Benz', model: 'S-Class', fuel_type: 'Gasoline', transmission: 'Automatic', body_type: 'Sedan' }, media: { photo_links: ['https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=640&h=400&fit=crop&auto=format&q=80'] }, dealer: { city: 'Los Angeles', state: 'CA', dealer_type: 'franchise' } },
+    { id: 'demo-3', vin: 'DEMO3', heading: '2025 Tesla Model S Plaid', price: 89990, miles: 3200, inventory_type: 'used', build: { year: 2025, make: 'Tesla', model: 'Model S', fuel_type: 'Electric', transmission: 'Automatic', body_type: 'Sedan' }, media: { photo_links: ['https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=640&h=400&fit=crop&auto=format&q=80'] }, dealer: { city: 'San Francisco', state: 'CA', dealer_type: 'independent' } },
+    { id: 'demo-4', vin: 'DEMO4', heading: '2025 Porsche 911 Turbo S', price: 216100, miles: 2100, inventory_type: 'certified', build: { year: 2025, make: 'Porsche', model: '911', fuel_type: 'Gasoline', transmission: 'Automatic', body_type: 'Coupe' }, media: { photo_links: ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=640&h=400&fit=crop&auto=format&q=80'] }, dealer: { city: 'Miami', state: 'FL', dealer_type: 'franchise' } },
+    { id: 'demo-5', vin: 'DEMO5', heading: '2026 Toyota RAV4 Hybrid', price: 35400, miles: 50, inventory_type: 'new', build: { year: 2026, make: 'Toyota', model: 'RAV4', fuel_type: 'Hybrid', transmission: 'Automatic', body_type: 'SUV' }, media: { photo_links: ['https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=640&h=400&fit=crop&auto=format&q=80'] }, dealer: { city: 'Chicago', state: 'IL', dealer_type: 'franchise' } },
+    { id: 'demo-6', vin: 'DEMO6', heading: '2025 Ford Mustang GT', price: 42300, miles: 8500, inventory_type: 'used', build: { year: 2025, make: 'Ford', model: 'Mustang', fuel_type: 'Gasoline', transmission: 'Manual', body_type: 'Coupe' }, media: { photo_links: ['https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=640&h=400&fit=crop&auto=format&q=80'] }, dealer: { city: 'Dallas', state: 'TX', dealer_type: 'independent' } },
+  ];
+}
+
+function buildDemoFeed() {
+  const processed = processPipeline(getDemoListings(), { minPhotos: 2 });
+  const usedIds = new Set();
+  return {
+    rails: {
+      editorPicks: pickRail(processed, 6, usedIds, l => l._meta?.score || 0),
+      bestDeals: pickRail(processed, 6, usedIds, l => l._meta?.priceFairness || 0),
+      lowMileage: pickRail(processed, 6, usedIds, l => l._meta?.mileageValue || 0),
+      justArrived: pickRail(processed, 6, usedIds, l => l._meta?.freshness || 0),
+    },
+    totalAvailable: processed.length,
+    source: 'demo',
+  };
+}
+
+/** Real listings from eBay when MarketCheck is unavailable (quota, error). Alternative to demo. */
+async function buildEbayFeed() {
+  if (!EBAY_CLIENT_ID || !EBAY_CLIENT_SECRET) return null;
+  try {
+    const [carRes, suvRes, truckRes] = await Promise.all([
+      ebayBrowseSearch({ q: 'car', limit: 25, category_ids: '6001' }),
+      ebayBrowseSearch({ q: 'suv', limit: 15, category_ids: '6001' }),
+      ebayBrowseSearch({ q: 'pickup truck', limit: 10, category_ids: '6001' }),
+    ]);
+    const seen = new Set();
+    const allSummaries = [];
+    [...(carRes.itemSummaries || []), ...(suvRes.itemSummaries || []), ...(truckRes.itemSummaries || [])].forEach(s => {
+      const id = s.itemId || s.legacyItemId;
+      if (id && !seen.has(id)) { seen.add(id); allSummaries.push(s); }
+    });
+    if (allSummaries.length === 0) return null;
+    let allRaw = allSummaries.map(normalizeEbayListing).map(normalizeListing);
+    allRaw = applyFeatured(allRaw);
+    const processed = processPipeline(allRaw, { minPhotos: 2 });
+    const usedIds = new Set();
+    const payload = {
+      rails: {
+        editorPicks: pickRail(processed, 6, usedIds, l => l._meta?.score ?? 0.5),
+        bestDeals:   pickRail(processed, 6, usedIds, l => l._meta?.priceFairness ?? 0.5),
+        lowMileage:  pickRail(processed, 6, usedIds, l => l._meta?.mileageValue ?? 0.5),
+        justArrived: pickRail(processed, 6, usedIds, l => l._meta?.freshness ?? 0.5),
+      },
+      totalAvailable: (carRes.total || 0) + (suvRes.total || 0) + (truckRes.total || 0),
+      source: 'ebay',
+    };
+    const hasAny = Object.values(payload.rails).some(arr => Array.isArray(arr) && arr.length > 0);
+    return hasAny ? payload : null;
+  } catch (e) {
+    log('warn', 'buildEbayFeed failed', { err: e.message });
+    return null;
+  }
+}
+
+/** Real listings from Auto.dev when MarketCheck is unavailable. Uses AUTO_DEV_API_KEY (1000 calls/month). */
+async function buildAutoDevFeed() {
+  if (!AUTO_DEV_API_KEY) return null;
+  try {
+    const res = await autoDevFetch('', { limit: 80, page: 1 });
+    if (!res || !Array.isArray(res.data) || res.data.length === 0) return null;
+    let allRaw = res.data.map(normalizeAutoDevListing).map(normalizeListing);
+    allRaw = applyFeatured(allRaw);
+    const processed = processPipeline(allRaw, { minPhotos: 2 });
+    const usedIds = new Set();
+    const payload = {
+      rails: {
+        editorPicks: pickRail(processed, 6, usedIds, l => l._meta?.score ?? 0.5),
+        bestDeals:   pickRail(processed, 6, usedIds, l => l._meta?.priceFairness ?? 0.5),
+        lowMileage:  pickRail(processed, 6, usedIds, l => l._meta?.mileageValue ?? 0.5),
+        justArrived: pickRail(processed, 6, usedIds, l => l._meta?.freshness ?? 0.5),
+      },
+      totalAvailable: res.data.length,
+      source: 'autodev',
+    };
+    const hasAny = Object.values(payload.rails).some(arr => Array.isArray(arr) && arr.length > 0);
+    return hasAny ? payload : null;
+  } catch (e) {
+    log('warn', 'buildAutoDevFeed failed', { err: e.message });
+    return null;
+  }
+}
+
 /* =========================================================
    HTTP HELPERS
    ========================================================= */
 function jsonRes(req, res, status, body, extraHeaders) {
   const cacheDir = status >= 200 && status < 300 ? 'public, max-age=300' : 'no-store';
   res.setHeader('Cache-Control', cacheDir);
+  if (body && body.source != null) res.setHeader('X-ND-Source', String(body.source));
   if (extraHeaders && typeof extraHeaders === 'object') {
     Object.entries(extraHeaders).forEach(([k, v]) => v != null && res.setHeader(k, v));
   }
@@ -638,6 +888,26 @@ function loadFeatured() {
 
 function saveFeatured(list) {
   fs.writeFileSync(FEATURED_FILE, JSON.stringify(list, null, 2), 'utf8');
+}
+
+/** Ensure each listing has build and heading for pipeline/cards (MarketCheck may use build or top-level year/make/model) */
+function normalizeListing(l) {
+  const b = l.build || {};
+  const build = {
+    year: l.year ?? b.year,
+    make: l.make ?? b.make,
+    model: l.model ?? b.model,
+    fuel_type: l.fuel_type ?? b.fuel_type,
+    transmission: l.transmission ?? b.transmission,
+    body_type: l.body_type ?? b.body_type,
+    engine: b.engine,
+    drivetrain: b.drivetrain,
+    doors: b.doors,
+    city_mpg: b.city_mpg,
+    highway_mpg: b.highway_mpg,
+  };
+  const heading = l.heading || (build.year || build.make || build.model ? [build.year, build.make, build.model].filter(Boolean).join(' ') : 'Vehicle');
+  return { ...l, build, heading };
 }
 
 function applyFeatured(listings) {
@@ -681,10 +951,25 @@ async function handleAPI(reqUrl, req, res) {
       return true;
     }
 
+    /* ═══ DIAG (dev: MarketCheck key + last calls) ═══ */
+    if (pathname === '/api/_diag' && req.method === 'GET') {
+      const hasKey = !!(process.env.MARKETCHECK_API_KEY || '').trim();
+      jsonRes(req, res, 200, {
+        ok: true,
+        port: process.env.PORT || null,
+        nodeEnv: process.env.NODE_ENV || null,
+        hasKey,
+        keyLen: hasKey ? String(process.env.MARKETCHECK_API_KEY).trim().length : 0,
+        lastMc: LAST_MC,
+      });
+      return true;
+    }
+
     /* ═══ HOME FEED ═══ */
     if (pathname === '/api/home-feed') {
       const cacheKey = 'home-feed';
-      const { data: cached, stale } = fromCache(cacheKey);
+      const nocache = (q.nocache === '1' || q.fresh === '1');
+      const { data: cached, stale } = nocache ? { data: null, stale: false } : fromCache(cacheKey);
       if (cached && !stale) { jsonRes(req, res, 200, cached); return true; }
 
       const fetchFresh = async () => {
@@ -715,6 +1000,21 @@ async function handleAPI(reqUrl, req, res) {
           }),
         ]);
 
+        /* Treat non-200 or API error as failure so we log and fall back to demo */
+        const check = (r, label) => {
+          if (r.status !== 200) {
+            const msg = (r.body && (r.body.message || r.body.error)) ? (r.body.message || r.body.error) : 'HTTP ' + r.status;
+            throw new Error('MarketCheck ' + label + ': ' + msg);
+          }
+          if (r.body && (r.body.error || r.body.message) && !r.body.listings) {
+            throw new Error('MarketCheck ' + label + ': ' + (r.body.message || r.body.error));
+          }
+        };
+        check(premiumRes, 'premium');
+        check(valueRes, 'value');
+        check(freshRes, 'fresh');
+        check(suvRes, 'suv');
+
         let allRaw = [
           ...(premiumRes.body.listings || []),
           ...(valueRes.body.listings || []),
@@ -722,11 +1022,16 @@ async function handleAPI(reqUrl, req, res) {
           ...(suvRes.body.listings || []),
         ];
 
+        if (allRaw.length === 0) {
+          throw new Error('MarketCheck returned 0 listings (key may be invalid or quota exceeded)');
+        }
+
+        allRaw = allRaw.map(normalizeListing);
         allRaw = applyFeatured(allRaw);
-        const processed = processPipeline(allRaw);
+        const processed = processPipeline(allRaw, { minPhotos: 2 });
         const usedIds = new Set();
 
-        return {
+        const payload = {
           rails: {
             editorPicks: pickRail(processed, 6, usedIds, l => l._meta.score),
             bestDeals:   pickRail(processed, 6, usedIds, l => l._meta.priceFairness),
@@ -735,6 +1040,8 @@ async function handleAPI(reqUrl, req, res) {
           },
           totalAvailable: premiumRes.body.num_found || 0,
         };
+        const hasAny = Object.values(payload.rails).some(arr => Array.isArray(arr) && arr.length > 0);
+        return hasAny ? payload : buildDemoFeed();
       };
 
       if (cached && stale) {
@@ -743,9 +1050,42 @@ async function handleAPI(reqUrl, req, res) {
         return true;
       }
 
-      const response = await fetchFresh();
-      toCache(cacheKey, response);
+      let response;
+      try {
+        response = await fetchFresh();
+      } catch (e) {
+        log('warn', 'home_feed_marketcheck_failed', { reason: e.message });
+        response = await buildAutoDevFeed();
+        if (!response) response = await buildEbayFeed();
+        if (!response) {
+          log('warn', 'home_feed_serving_demo', { reason: 'Auto.dev and eBay unavailable or returned no listings' });
+          response = buildDemoFeed();
+        }
+      }
+      const hasRails = response && response.rails &&
+        ['editorPicks', 'bestDeals', 'lowMileage', 'justArrived'].some(k =>
+          Array.isArray(response.rails[k]) && response.rails[k].length > 0);
+      if (!hasRails) {
+        response = await buildAutoDevFeed();
+        if (!response) response = await buildEbayFeed();
+        if (!response) {
+          log('warn', 'home_feed_serving_demo', { reason: 'empty_or_invalid_live_feed' });
+          response = buildDemoFeed();
+          response.source = 'demo';
+          response.reason = 'empty_or_invalid_live_feed';
+        }
+      } else {
+        response.source = response.source || 'live';
+      }
+      if (!nocache) toCache(cacheKey, response);
       jsonRes(req, res, 200, response);
+      return true;
+    }
+
+    /* Legacy alias used by older clients */
+    if (pathname === '/api/listings') {
+      const processed = processPipeline(getDemoListings(), { rank: false, maxPerModel: 999, minPhotos: 2 });
+      jsonRes(req, res, 200, { num_found: processed.length, listings: processed, source: 'demo' });
       return true;
     }
 
@@ -784,8 +1124,42 @@ async function handleAPI(reqUrl, req, res) {
         result = invCached;
         mcFetch('/search/car/active', params).then(fresh => toCache(invCacheKey, fresh)).catch(() => {});
       } else {
-        result = await mcFetch('/search/car/active', params);
-        toCache(invCacheKey, result);
+        try {
+          result = await mcFetch('/search/car/active', params);
+          toCache(invCacheKey, result);
+        } catch (mcErr) {
+          log('warn', 'inventory_marketcheck_failed', { reason: mcErr.message });
+          if (AUTO_DEV_API_KEY) {
+            const adQs = { limit: Math.min(rows, 100), page: Math.floor(start / rows) + 1 };
+            if (q.make) adQs.make = q.make;
+            const adRes = await autoDevFetch('', adQs);
+            if (adRes && Array.isArray(adRes.data) && adRes.data.length > 0) {
+              const list = adRes.data.map(normalizeAutoDevListing).map(normalizeListing);
+              result = { body: { listings: list, num_found: adRes.data.length }, _source: 'autodev' };
+              log('info', 'inventory_serving_autodev', { count: list.length });
+            }
+          }
+          if (!result || !result.body?.listings?.length) {
+            if (EBAY_CLIENT_ID && EBAY_CLIENT_SECRET) {
+              try {
+                const ebayRes = await ebayBrowseSearch({
+                  q: (q.make || 'car').trim(),
+                  limit: Math.min(rows, 50),
+                  offset: start,
+                  category_ids: '6001',
+                });
+                const ebayListings = (ebayRes.itemSummaries || []).map(normalizeEbayListing).map(normalizeListing);
+                result = { body: { listings: ebayListings, num_found: ebayRes.total || ebayListings.length }, _source: 'ebay' };
+                log('info', 'inventory_serving_ebay', { count: ebayListings.length });
+              } catch (ebayErr) {
+                log('warn', 'inventory_ebay_fallback_failed', { err: ebayErr.message });
+                result = { body: { listings: [], num_found: 0 } };
+              }
+            } else if (!result) {
+              result = { body: { listings: [], num_found: 0 } };
+            }
+          }
+        }
       }
 
       let raw = result.body?.listings || [];
@@ -793,13 +1167,17 @@ async function handleAPI(reqUrl, req, res) {
 
       const hasSpecificMake = !!q.make;
       const preferredMax = hasSpecificMake ? 6 : 3;
-      let processed = processPipeline(raw, { rank: false, maxPerModel: preferredMax });
+      let processed = processPipeline(raw, { rank: false, maxPerModel: preferredMax, minPhotos: 1 });
       if (processed.length < rows) {
-        processed = processPipeline(raw, { rank: false, maxPerModel: 999 });
+        processed = processPipeline(raw, { rank: false, maxPerModel: 999, minPhotos: 1 });
       }
       let trimmed = processed.slice(0, rows);
+      if (trimmed.length === 0) {
+        const demo = processPipeline(getDemoListings(), { rank: false, maxPerModel: 999, minPhotos: 2 });
+        trimmed = demo.slice(0, rows);
+      }
 
-      /* Merge eBay vehicles when credentials are set */
+      let out;
       if (EBAY_CLIENT_ID && EBAY_CLIENT_SECRET) {
         const ebayLimit = Math.min(10, Math.max(0, rows));
         const ebayQ = (q.make || 'car').trim();
@@ -811,26 +1189,28 @@ async function handleAPI(reqUrl, req, res) {
             category_ids: '6001',
           });
           const ebayListings = (ebayRes.itemSummaries || []).map(normalizeEbayListing);
-          const combined = [...trimmed, ...ebayListings].slice(0, rows);
+          trimmed = [...trimmed, ...ebayListings].slice(0, rows);
           const mcCount = result.body?.num_found || 0;
-          trimmed = combined;
-          jsonRes(req, res, 200, {
-            num_found: mcCount + (ebayRes.total || 0),
-            listings: trimmed,
-          });
+          out = { num_found: Math.max(trimmed.length, mcCount + (ebayRes.total || 0)), listings: trimmed };
         } catch (ebayErr) {
           log('warn', 'eBay merge failed', { err: ebayErr.message });
-          jsonRes(req, res, 200, {
-            num_found: result.body?.num_found || 0,
-            listings: trimmed,
-          });
+          out = { num_found: Math.max(trimmed.length, result.body?.num_found || 0), listings: trimmed };
         }
       } else {
-        jsonRes(req, res, 200, {
-          num_found: result.body?.num_found || 0,
-          listings: trimmed,
-        });
+        out = { num_found: Math.max(trimmed.length, result.body?.num_found || 0), listings: trimmed };
       }
+      if (!Array.isArray(out.listings) || out.listings.length === 0) {
+        const demo = processPipeline(getDemoListings(), { rank: false, maxPerModel: 999, minPhotos: 2 });
+        jsonRes(req, res, 200, {
+          source: 'demo',
+          reason: 'empty_or_invalid_live_inventory',
+          num_found: demo.length,
+          listings: demo.slice(0, rows),
+        });
+        return true;
+      }
+      out.source = result._source || 'live';
+      jsonRes(req, res, 200, out);
       return true;
     }
 
@@ -954,8 +1334,51 @@ function appendNdjson(filename, record) {
   }
 }
 
-/** POST lead to LEAD_WEBHOOK_URL. Signs with HMAC when LEAD_WEBHOOK_SECRET set. Retries once with 2s backoff. No PII in failure logs. */
-function sendLeadToWebhook(type, payload) {
+/** Send confirmation email to user who requested an account. Uses Resend; from address must be set (no blank). */
+function sendAccountConfirmationEmail(toEmail, userName) {
+  const apiKey = config.RESEND_API_KEY;
+  const from = config.NOTIFICATION_FROM_EMAIL;
+  if (!apiKey || !from) return; /* no blank: need both to send */
+  const name = (userName && String(userName).trim()) || 'there';
+  const html = `
+    <p>Hi ${escapeHtml(name)},</p>
+    <p>We received your request for a NightDrive account. We'll email you with a link to create your account when it's ready.</p>
+    <p>— NightDrive</p>
+  `;
+  const body = JSON.stringify({
+    from,
+    to: [toEmail],
+    subject: 'We got your NightDrive account request',
+    html: html.trim(),
+  });
+  const opts = {
+    hostname: 'api.resend.com',
+    port: 443,
+    path: '/emails',
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body, 'utf8'),
+    },
+  };
+  const req = https.request(opts, (res) => {
+    res.resume();
+    if (res.statusCode >= 200 && res.statusCode < 300) return;
+    log('warn', 'account_confirmation_email_failed', { status: res.statusCode });
+  });
+  req.on('error', (err) => log('warn', 'account_confirmation_email_failed', { err: err.message }));
+  req.setTimeout(10000, () => req.destroy());
+  req.end(body);
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
   const url = config.LEAD_WEBHOOK_URL;
   if (!url) return;
   const body = JSON.stringify({ type, payload, ts: new Date().toISOString() });
@@ -1092,6 +1515,36 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  /* Avoid noisy browser/devtools 404s */
+  if (req.url === '/favicon.ico') {
+    res.writeHead(200, { 'Content-Type': 'image/x-icon', 'Cache-Control': 'public, max-age=86400' });
+    res.end();
+    return;
+  }
+  if (req.url === '/.well-known/appspecific/com.chrome.devtools.json') {
+    res.writeHead(204, { 'Cache-Control': 'public, max-age=86400' });
+    res.end();
+    return;
+  }
+
+  /* Legacy/non-project frontend probes: keep console clean (temporary no-op) */
+  if (req.url.startsWith('/backend-api/')) {
+    const pathOnly = req.url.split('?')[0];
+    if (pathOnly === '/backend-api/ca/v2/u_connection_status') {
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      res.end(JSON.stringify({ connected: true, source: 'stub' }));
+      return;
+    }
+    if (pathOnly === '/backend-api/conversation/init') {
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      res.end(JSON.stringify({ ok: true, conversationId: null, source: 'stub' }));
+      return;
+    }
+    res.writeHead(204, { 'Cache-Control': 'no-store' });
+    res.end();
+    return;
+  }
+
   /* ── API routes ── */
   if (req.url.startsWith('/api/')) {
     const corsOk = handleCors(req, res, {
@@ -1198,6 +1651,52 @@ const server = http.createServer(async (req, res) => {
         log('info', 'lead_captured', { type: 'newsletter', email });
         res.writeHead(201, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify({ success: true, message: 'Subscribed successfully!' }));
+      } catch (err) {
+        jsonRes(req, res, 400, { error: err.message || 'Invalid request' });
+      }
+      return;
+    }
+
+    /* ═══ POST /api/account-request ═══ */
+    if (req.method === 'POST' && req.url === '/api/account-request') {
+      const arl = rateLimit(req, 'account');
+      if (!arl.allowed) {
+        res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(arl.retryAfter) });
+        res.end(JSON.stringify({ error: 'Too many requests. Please try again later.', retryAfter: arl.retryAfter }));
+        return;
+      }
+      try {
+        const body = await readBody(req, BODY_LIMIT_LEAD_FORMS);
+        const { name, email, [HONEYPOT_FIELD]: honeypot, _t0: t0 } = body || {};
+        if (honeypot && String(honeypot).trim() !== '') {
+          jsonRes(req, res, 400, { error: 'Invalid request' });
+          return;
+        }
+        const submittedAt = typeof t0 === 'number' ? t0 : parseInt(t0, 10);
+        if (!Number.isFinite(submittedAt) || (Date.now() - submittedAt) < MIN_SUBMIT_MS) {
+          jsonRes(req, res, 400, { error: 'Please wait a moment and try again.' });
+          return;
+        }
+        if (!email) {
+          jsonRes(req, res, 400, { error: 'Missing required field: email' });
+          return;
+        }
+        if (!isValidEmail(email)) {
+          jsonRes(req, res, 400, { error: 'Invalid email format' });
+          return;
+        }
+        const record = {
+          name: name || null,
+          email,
+          source: req.headers.referer || 'direct',
+          ip,
+        };
+        appendNdjson('account-requests.ndjson', record);
+        sendLeadToWebhook('account-request', record);
+        sendAccountConfirmationEmail(record.email, record.name);
+        log('info', 'lead_captured', { type: 'account', email });
+        res.writeHead(201, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        res.end(JSON.stringify({ success: true, message: 'Account request received. We will email you with steps to create your account.' }));
       } catch (err) {
         jsonRes(req, res, 400, { error: err.message || 'Invalid request' });
       }

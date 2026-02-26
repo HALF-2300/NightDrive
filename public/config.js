@@ -7,6 +7,8 @@
  *   Render:  window.ND_API_BASE = 'https://nightdrive.onrender.com';
  *   Railway: window.ND_API_BASE = 'https://nightdrive-production-xxxx.up.railway.app';
  */
-// Backend URL so the frontend (Pages) can load cars. No trailing slash.
-// If you use Railway instead, replace with your Railway URL (e.g. https://nightdrive-production-xxxx.up.railway.app).
-window.ND_API_BASE = 'https://nightdrive.onrender.com';
+// Local dev should use same-origin API (node server on localhost).
+// Hosted frontend should use Render/Railway backend URL.
+const _ndHost = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '';
+const _isLocal = _ndHost === 'localhost' || _ndHost === '127.0.0.1' || _ndHost === '::1';
+window.ND_API_BASE = _isLocal ? '' : 'https://nightdrive.onrender.com';
